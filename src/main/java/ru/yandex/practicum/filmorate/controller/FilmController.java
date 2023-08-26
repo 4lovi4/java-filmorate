@@ -1,8 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.validator.FilmValidator;
+import ru.yandex.practicum.filmorate.validator.ValidationException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,56 +20,29 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final HashSet<Film> films = new HashSet<>();
-    private static final LocalDate oldestReleaseDate = LocalDate
-            .parse("1895-12-28", DateTimeFormatter.ISO_LOCAL_DATE);
+
+    @Autowired
+    FilmService filmService;
+
+    @Autowired
+    FilmValidator filmValidator;
 
     @GetMapping
-    public List<Film> getAllFilms() {
-        return new ArrayList<>(films);
+    public List<Film> findAllFilms() {
+        return filmService.getAllFilms();
     }
 
     @PostMapping
     public Film addNewFilm(@RequestBody Film film) {
-        validateFilm(film);
-        films.add(film);
-        return film;
+        return filmService.addNewFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        validateFilm(film);
-        if (films.contains(film)) {
-            films.remove(film);
-            films.add(film);
-        }
-        else {
-            films.add(film);
-        }
-        return film;
+        return filmService.updateFilm(film);
     }
 
-    private void validateFilm(Film film) {
-        if (film.getName().isEmpty()) {
-            log.error("Поле name пустое");
-            throw new ValidationException("Поле name не может быть пустым");
-        }
-
-        if (film.getDescription().length() > 200) {
-            log.error("Длина описания фильма в поле description больше 200 символов");
-            throw new ValidationException("Длина описания фильма в поле description не может быть больше 200 символов");
-        }
-
-        if (film.getReleaseDate().isBefore(oldestReleaseDate)) {
-            log.error("Дата релиза фильма раньше предельной даты в истории кинематографа " +
-                    oldestReleaseDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
-            throw new ValidationException("Дата выпуска фильма старше " +
-                    oldestReleaseDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        }
-
-        if (film.getDuration() <= 0) {
-            log.error("Продолжительность фильма duration = " + film.getDuration() +
-                    " должна быть > 0");
-            throw new ValidationException("Продолжительность фильма duration должна быть положительной");
-        }
-    }
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    void onValidationError() {}
 }

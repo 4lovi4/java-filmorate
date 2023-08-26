@@ -1,8 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.validator.UserValidator;
+import ru.yandex.practicum.filmorate.validator.ValidationException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,57 +21,32 @@ import java.util.List;
 public class UserController {
     private final HashSet<User> users = new HashSet<>();
 
+    @Autowired
+    UserService userService;
+
     @GetMapping
-    public List<User> getAllUsers() {
-        return new ArrayList<User>(users);
+    public List<User> findAllUsers() {
+        return userService.getAllUsers();
     }
 
     @PostMapping
-    public User addNewUser(User user) {
-        validateUser(user);
-        users.add(user);
-        return user;
+    public User addNewUser(@RequestBody User user) {
+        User resultUser;
+        try {
+            resultUser = userService.addNewUser(user);
+        }
+        catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        return resultUser;
     }
 
     @PutMapping
-    public User updateUser(User user) {
-        validateUser(user);
-        if (users.contains(user)) {
-            users.remove(user);
-            users.add(user);
-        }
-        else {
-            users.add(user);
-        }
-        return user;
+    public User updateUser(@RequestBody User user) {
+        return userService.updateUser(user);
     }
 
-    private void validateUser(User user) {
-
-        LocalDate dateNow = LocalDate.now();
-
-        if (user.getName().isEmpty()) {
-            log.error("Поле name пустое");
-            throw new ValidationException("Поле name не может быть пустым");
-        }
-        else if (user.getName().matches("^[A-Za-z0-9+_.-]+@(.+)\\.(.+)$")) {
-            log.error("Поле email: " + user.getName() + " не соответствует паттерну \".*@.*\"");
-            throw new ValidationException("Ошибка валидации email");
-        }
-
-        if (user.getLogin().isEmpty()) {
-            log.error("Поле login пустое");
-            throw new ValidationException("Поле login не может быть пустым");
-        }
-        else if (user.getLogin().matches("^.*\\s+.*$")) {
-            log.error("В поле login: " + user.getLogin() + " есть символ пробела");
-            throw new ValidationException("Поле login не должно содержать пробелы");
-        }
-
-        if (user.getBirthday().isAfter(dateNow)) {
-            log.error("Дата рождения birthday: " + user.getBirthday() +
-                    " в будущем");
-            throw new ValidationException("Дата рождения пользователя не может быть в будущем");
-        }
-    }
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    void onValidationError() {}
 }
