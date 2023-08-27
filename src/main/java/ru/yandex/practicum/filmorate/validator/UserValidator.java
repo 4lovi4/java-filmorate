@@ -15,22 +15,26 @@ public class UserValidator {
 
     public void validate(User user) {
 
-        if (Objects.isNull(user.getName()) || user.getName().isBlank()) {
+        if (Objects.isNull(user.getEmail()) || user.getEmail().isBlank()) {
             log.error("Поле name пустое");
             throw new ValidationException("Поле name не может быть пустым");
         }
-        else if (user.getName().matches("^[A-Za-z0-9+_.-]+@(.+)\\.(.+)$")) {
+        else if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@[a-z0-9.]+$")) {
             log.error("Поле email: " + user.getName() + " не соответствует паттерну \".*@.*\"");
             throw new ValidationException("Ошибка валидации email");
         }
 
-        if (user.getLogin().isEmpty()) {
+        if (user.getLogin().isBlank()) {
             log.error("Поле login пустое");
             throw new ValidationException("Поле login не может быть пустым");
         }
         else if (user.getLogin().matches("^.*\\s+.*$")) {
             log.error("В поле login: " + user.getLogin() + " есть символ пробела");
             throw new ValidationException("Поле login не должно содержать пробелы");
+        }
+
+        if (Objects.isNull(user.getName()) || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {

@@ -56,7 +56,7 @@ public class FilmServiceTest {
 
     @Test
     @DisplayName("Редактирование добавленного фильма")
-    void shouldUpdateNewFilm() {
+    void shouldUpdateFilm() {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
 
         filmService.addNewFilm(filmOne);
@@ -74,7 +74,7 @@ public class FilmServiceTest {
     }
 
     @Test
-    @DisplayName("Исключение: name при добавлении уже есть такой фильм в сервисе")
+    @DisplayName("Исключение: при добавлении уже есть такой фильм в сервисе")
     void shouldThrowExceptionOnRepeatAdd() {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
         filmService.addNewFilm(filmOne);
