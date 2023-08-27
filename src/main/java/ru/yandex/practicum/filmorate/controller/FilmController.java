@@ -2,9 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validator.ValidationException;
@@ -38,13 +39,12 @@ public class FilmController {
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ModelAndView onValidationError(HttpServletRequest request, Exception exception) {
+    ResponseEntity onValidationError(HttpServletRequest request, Exception exception) {
         log.error("Request: " + request.getRequestURL() + " raised " + exception);
-        ModelAndView errorResponse = new ModelAndView();
-        errorResponse.addObject("exception", exception);
-        errorResponse.addObject("url", request.getRequestURL());
-        errorResponse.setViewName("error");
+        String payload = "{\"path\":" + "\"" + request.getRequestURL() + "\"" + ",\"error\":" + "\"" + exception + "\"}";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        ResponseEntity errorResponse = new ResponseEntity<>(payload, headers, HttpStatus.BAD_REQUEST);
         return errorResponse;
     }
 }
