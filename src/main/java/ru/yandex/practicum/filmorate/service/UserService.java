@@ -36,8 +36,7 @@ public class UserService {
         userValidator.validate(user);
         if (!users.contains(user)) {
             users.add(user);
-        }
-        else {
+        } else {
             log.error("Пользователь уже добавлен в сервисе");
             throw new ValidationException("Пользователь уже добавлен");
         }
@@ -49,8 +48,7 @@ public class UserService {
         if (users.contains(user)) {
             users.remove(user);
             users.add(user);
-        }
-        else {
+        } else {
             log.error("Передан неизвестный пользователь для редактирования");
             throw new ValidationException("Неизвестный пользователь");
         }

@@ -36,8 +36,7 @@ public class FilmService {
         filmValidator.validate(film);
         if (!films.contains(film)) {
             films.add(film);
-        }
-        else {
+        } else {
             log.error("Фильм уже добавлен в сервис");
             throw new ValidationException("Фильм уже добавлен");
         }
@@ -49,8 +48,7 @@ public class FilmService {
         if (films.contains(film)) {
             films.remove(film);
             films.add(film);
-        }
-        else {
+        } else {
             log.error("Неизвестный фильм передан для редактирования");
             throw new ValidationException("В запросе передан неизвестный фильм для редактирования");
         }
