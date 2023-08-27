@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.ValidationException;
 
@@ -71,7 +70,7 @@ public class UserServiceTest {
     void shouldThrowExceptionOnRepeatAdd() {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(1988, 6, 25));
         userService.addNewUser(userOne);
-        assertThrows(ValidationException.class, ()->userService.addNewUser(userOne));
+        assertThrows(ValidationException.class, ()-> userService.addNewUser(userOne));
     }
 
     @ParameterizedTest
@@ -79,7 +78,7 @@ public class UserServiceTest {
     @ValueSource(strings = {"", " ", "somedogpochta.is"})
     void shouldThrowExceptionOnWrongEmail(String email) {
         User userOne = new User(1L, email, "abc", "Boris", LocalDate.of(1988, 6, 25));
-        assertThrows(ValidationException.class, ()->userService.addNewUser(userOne));
+        assertThrows(ValidationException.class, ()-> userService.addNewUser(userOne));
     }
 
     @ParameterizedTest
@@ -87,7 +86,7 @@ public class UserServiceTest {
     @ValueSource(strings = {"", " ", "login    1", "best login"})
     void shouldThrowExceptionOnWrongLogin(String login) {
         User userOne = new User(1L, "boris@razor.bum", login, "Boris", LocalDate.of(1988, 6, 25));
-        assertThrows(ValidationException.class, ()->userService.addNewUser(userOne));
+        assertThrows(ValidationException.class, ()-> userService.addNewUser(userOne));
     }
 
     @ParameterizedTest
@@ -105,14 +104,14 @@ public class UserServiceTest {
     @DisplayName("Исключение: при добавлении пользователя дата рождения birthday в будущем")
     void shouldThrowExceptionOnFutureBirthday() {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(2088, 6, 25));
-        assertThrows(ValidationException.class, ()->userService.addNewUser(userOne));
+        assertThrows(ValidationException.class, ()-> userService.addNewUser(userOne));
     }
 
     @Test
     @DisplayName("Исключение: при изменении неизвестного пользователя")
     void shouldThrowExceptionOnNonExistingUserUpdate() {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(1988, 6, 25));
-        assertThrows(ValidationException.class, ()->userService.updateUser(userOne));
+        assertThrows(ValidationException.class, ()-> userService.updateUser(userOne));
     }
 
     @ParameterizedTest
@@ -122,7 +121,7 @@ public class UserServiceTest {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(1988, 6, 25));
         userService.addNewUser(userOne);
         User userTwo = new User(1L, email, "abc", "Boris", LocalDate.of(1988, 6, 25));
-        assertThrows(ValidationException.class, ()->userService.updateUser(userTwo));
+        assertThrows(ValidationException.class, ()-> userService.updateUser(userTwo));
     }
 
     @ParameterizedTest
@@ -132,7 +131,7 @@ public class UserServiceTest {
         User userOne = new User(1L, "boris@razor.bum", "nospace", "Boris", LocalDate.of(1988, 6, 25));
         userService.addNewUser(userOne);
         userOne.setLogin(login);
-        assertThrows(ValidationException.class, ()->userService.updateUser(userOne));
+        assertThrows(ValidationException.class, ()-> userService.updateUser(userOne));
     }
 
     @ParameterizedTest
@@ -152,7 +151,7 @@ public class UserServiceTest {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(1988, 6, 25));
         userService.addNewUser(userOne);
         User userTwo = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(2088, 6, 25));
-        assertThrows(ValidationException.class, ()->userService.addNewUser(userTwo));
+        assertThrows(ValidationException.class, ()-> userService.addNewUser(userTwo));
     }
 
 }
