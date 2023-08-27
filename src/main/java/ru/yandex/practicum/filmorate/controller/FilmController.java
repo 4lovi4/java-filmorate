@@ -24,9 +24,6 @@ public class FilmController {
     @Autowired
     FilmService filmService;
 
-    @Autowired
-    FilmValidator filmValidator;
-
     @GetMapping
     public List<Film> findAllFilms() {
         return filmService.getAllFilms();

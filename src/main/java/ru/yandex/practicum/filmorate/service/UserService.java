@@ -1,17 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
+import ru.yandex.practicum.filmorate.validator.ValidationException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final HashSet<User> users;
@@ -37,8 +38,8 @@ public class UserService {
             users.add(user);
         }
         else {
-            users.remove(user);
-            users.add(user);
+            log.error("Пользователь уже добавлен в сервисе");
+            throw new ValidationException("Пользователь уже добавлен");
         }
         return user;
     }
@@ -50,7 +51,8 @@ public class UserService {
             users.add(user);
         }
         else {
-            users.add(user);
+            log.error("Передан неизвестный пользователь для редактирования");
+            throw new ValidationException("Неизвестный пользователь");
         }
         return user;
     }

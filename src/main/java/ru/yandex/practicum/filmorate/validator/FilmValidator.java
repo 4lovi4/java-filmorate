@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -17,7 +18,7 @@ public class FilmValidator {
             .parse("1895-12-28", DateTimeFormatter.ISO_LOCAL_DATE);
 
     public void validate(Film film) {
-        if (film.getName().isBlank() || film.getName() == null) {
+        if (Objects.isNull(film.getName()) || film.getName().isBlank()) {
             log.error("Поле name пустое");
             throw new ValidationException("Поле name не может быть пустым");
         }

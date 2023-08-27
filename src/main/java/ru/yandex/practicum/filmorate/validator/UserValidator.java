@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -14,7 +15,7 @@ public class UserValidator {
 
     public void validate(User user) {
 
-        if (user.getName().isBlank() || user.getName() == null) {
+        if (Objects.isNull(user.getName()) || user.getName().isBlank()) {
             log.error("Поле name пустое");
             throw new ValidationException("Поле name не может быть пустым");
         }

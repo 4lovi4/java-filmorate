@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
+@Slf4j
 public class FilmService {
 
     @Autowired
@@ -41,8 +44,8 @@ public class FilmService {
             films.add(film);
         }
         else {
-            films.remove(film);
-            films.add(film);
+            log.error("Фильм уже добавлен в сервис");
+            throw new ValidationException("Фильм уже добавлен");
         }
         return film;
     }
@@ -54,7 +57,8 @@ public class FilmService {
             films.add(film);
         }
         else {
-            films.add(film);
+            log.error("Неизвестный фильм передан для редактирования");
+            throw new ValidationException("В запросе передан неизвестный фильм для редактирования");
         }
         return film;
     }
