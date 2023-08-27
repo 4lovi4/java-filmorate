@@ -4,14 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.ModelAndView;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
 import ru.yandex.practicum.filmorate.validator.ValidationException;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.List;
 
@@ -32,12 +30,7 @@ public class UserController {
     @PostMapping
     public User addNewUser(@RequestBody User user) {
         User resultUser;
-        try {
-            resultUser = userService.addNewUser(user);
-        }
-        catch (ValidationException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
+        resultUser = userService.addNewUser(user);
         return resultUser;
     }
 
@@ -48,5 +41,12 @@ public class UserController {
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    void onValidationError() {}
+    ModelAndView onValidationError(HttpServletRequest request, Exception exception) {
+        log.error("Request: " + request.getRequestURL() + " raised " + exception);
+        ModelAndView errorResponse = new ModelAndView();
+        errorResponse.addObject("exception", exception);
+        errorResponse.addObject("url", request.getRequestURL());
+        errorResponse.setViewName("error");
+        return errorResponse;
+    }
 }
