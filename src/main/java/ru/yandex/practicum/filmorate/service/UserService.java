@@ -7,7 +7,10 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 import ru.yandex.practicum.filmorate.validator.ValidationException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -18,7 +21,7 @@ public class UserService {
     private Long userCount;
 
     @Autowired
-    UserValidator userValidator;
+    private UserValidator userValidator;
 
     public UserService() {
         this.users = new HashMap<>();
@@ -35,6 +38,7 @@ public class UserService {
     }
 
     public User addNewUser(User user) {
+        log.debug("Запрос на добавление пользователя: " + user);
         userValidator.validate(user);
         Long currentId = userCount;
         if (!users.containsKey(user.getId()) || !users.values().contains(user)) {
@@ -50,10 +54,12 @@ public class UserService {
             log.error("Пользователь уже добавлен в сервисе");
             throw new ValidationException("Пользователь уже добавлен");
         }
+        log.debug("Добавлен пользователь: " + user);
         return user;
     }
 
     public User updateUser(User user) {
+        log.debug("Запрос на изменение пользователя: " + user);
         userValidator.validate(user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
@@ -61,6 +67,7 @@ public class UserService {
             log.error("Передан неизвестный пользователь для редактирования");
             throw new NotFoundException("Неизвестный пользователь");
         }
+        log.debug("Изменён пользователь: " + user);
         return user;
     }
 }
