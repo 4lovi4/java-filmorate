@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.validator.ValidationException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -17,15 +18,19 @@ public class UserService {
 
     private final HashSet<User> users;
 
+    private Long userCount;
+
     @Autowired
     UserValidator userValidator;
 
     public UserService() {
         this.users = new HashSet<>();
+        this.userCount = 0L;
     }
 
     public UserService(HashSet<User> users) {
         this.users = users;
+        this.userCount = (long) users.size();
     }
 
     public List<User> getAllUsers() {
@@ -35,6 +40,10 @@ public class UserService {
     public User addNewUser(User user) {
         userValidator.validate(user);
         if (!users.contains(user)) {
+            if (Objects.isNull(user.getId()) || (users.stream().anyMatch(u -> u.getId() == user.getId()))) {
+                userCount++;
+                user.setId(userCount);
+            }
             users.add(user);
         } else {
             log.error("Пользователь уже добавлен в сервисе");
@@ -50,7 +59,7 @@ public class UserService {
             users.add(user);
         } else {
             log.error("Передан неизвестный пользователь для редактирования");
-            throw new ValidationException("Неизвестный пользователь");
+            throw new NotFoundException("Неизвестный пользователь");
         }
         return user;
     }

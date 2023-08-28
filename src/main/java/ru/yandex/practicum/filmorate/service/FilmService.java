@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.validator.ValidationException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -20,11 +21,15 @@ public class FilmService {
 
     private final HashSet<Film> films;
 
+    private Long filmCounter;
+
     public FilmService() {
+        filmCounter = 0L;
         films = new HashSet<>();
     }
 
     public FilmService(HashSet<Film> films) {
+        filmCounter = (long) films.size();
         this.films = films;
     }
 
@@ -35,6 +40,10 @@ public class FilmService {
     public Film addNewFilm(Film film) {
         filmValidator.validate(film);
         if (!films.contains(film)) {
+            if (Objects.isNull(film.getId()) || films.stream().anyMatch(f -> f.getId() == film.getId())) {
+                filmCounter++;
+                film.setId(filmCounter);
+            }
             films.add(film);
         } else {
             log.error("Фильм уже добавлен в сервис");
@@ -50,7 +59,7 @@ public class FilmService {
             films.add(film);
         } else {
             log.error("Неизвестный фильм передан для редактирования");
-            throw new ValidationException("В запросе передан неизвестный фильм для редактирования");
+            throw new NotFoundException("В запросе передан неизвестный фильм для редактирования");
         }
         return film;
     }
