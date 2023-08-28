@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 import ru.yandex.practicum.filmorate.validator.ValidationException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -19,32 +16,36 @@ public class FilmService {
     @Autowired
     FilmValidator filmValidator;
 
-    private final HashSet<Film> films;
+    private final HashMap<Long, Film> films;
 
     private Long filmCounter;
 
     public FilmService() {
         filmCounter = 0L;
-        films = new HashSet<>();
+        films = new HashMap<>();
     }
 
-    public FilmService(HashSet<Film> films) {
-        filmCounter = (long) films.size();
+    public FilmService(HashMap<Long, Film> films) {
+        filmCounter = (long) films.keySet().size();
         this.films = films;
     }
 
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films);
+        return new ArrayList<>(films.values());
     }
 
     public Film addNewFilm(Film film) {
         filmValidator.validate(film);
-        if (!films.contains(film)) {
-            if (Objects.isNull(film.getId()) || films.stream().anyMatch(f -> f.getId() == film.getId())) {
+        Long currentId = filmCounter;
+        if (!films.containsKey(film.getId()) || !films.values().contains(film)) {
+            if (Objects.isNull(film.getId())) {
                 filmCounter++;
-                film.setId(filmCounter);
+                currentId = filmCounter;
+                film.setId(currentId);
+            } else {
+                currentId = film.getId();
             }
-            films.add(film);
+            films.put(currentId, film);
         } else {
             log.error("Фильм уже добавлен в сервис");
             throw new ValidationException("Фильм уже добавлен");
@@ -54,9 +55,8 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         filmValidator.validate(film);
-        if (films.contains(film)) {
-            films.remove(film);
-            films.add(film);
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
         } else {
             log.error("Неизвестный фильм передан для редактирования");
             throw new NotFoundException("В запросе передан неизвестный фильм для редактирования");

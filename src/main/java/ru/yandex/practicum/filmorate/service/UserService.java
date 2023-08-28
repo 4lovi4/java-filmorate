@@ -7,16 +7,13 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 import ru.yandex.practicum.filmorate.validator.ValidationException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
 public class UserService {
 
-    private final HashSet<User> users;
+    private final HashMap<Long, User> users;
 
     private Long userCount;
 
@@ -24,27 +21,31 @@ public class UserService {
     UserValidator userValidator;
 
     public UserService() {
-        this.users = new HashSet<>();
+        this.users = new HashMap<>();
         this.userCount = 0L;
     }
 
-    public UserService(HashSet<User> users) {
+    public UserService(HashMap<Long, User> users) {
         this.users = users;
-        this.userCount = (long) users.size();
+        this.userCount = (long) users.keySet().size();
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users);
+        return new ArrayList<>(users.values());
     }
 
     public User addNewUser(User user) {
         userValidator.validate(user);
-        if (!users.contains(user)) {
-            if (Objects.isNull(user.getId()) || (users.stream().anyMatch(u -> u.getId() == user.getId()))) {
+        Long currentId = userCount;
+        if (!users.containsKey(user.getId()) || !users.values().contains(user)) {
+            if (Objects.isNull(user.getId())) {
                 userCount++;
-                user.setId(userCount);
+                currentId = userCount;
+                user.setId(currentId);
+            } else {
+                currentId = user.getId();
             }
-            users.add(user);
+            users.put(currentId, user);
         } else {
             log.error("Пользователь уже добавлен в сервисе");
             throw new ValidationException("Пользователь уже добавлен");
@@ -54,9 +55,8 @@ public class UserService {
 
     public User updateUser(User user) {
         userValidator.validate(user);
-        if (users.contains(user)) {
-            users.remove(user);
-            users.add(user);
+        if (users.containsKey(user.getId())) {
+            users.put(user.getId(), user);
         } else {
             log.error("Передан неизвестный пользователь для редактирования");
             throw new NotFoundException("Неизвестный пользователь");

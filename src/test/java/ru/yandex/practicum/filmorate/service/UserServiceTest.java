@@ -57,7 +57,7 @@ public class UserServiceTest {
     @DisplayName("Редактирование добавленного пользователя")
     void shouldUpdateUser() {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(1988, 6, 25));
-        User userTwo = new User(2L, "abc@ya.is", "xyz", "Razor", LocalDate.of(1999, 9, 6));
+        User userTwo = new User(1L, "abc@mail.ru", "xyz", "Razor", LocalDate.of(1999, 9, 6));
         userService.addNewUser(userOne);
         User userUpdated = userService.updateUser(userTwo);
         assertEquals(userTwo, userUpdated);

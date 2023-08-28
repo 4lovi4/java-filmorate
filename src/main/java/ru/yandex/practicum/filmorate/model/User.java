@@ -16,10 +16,10 @@ public class User {
     private Long id;
     @EqualsAndHashCode.Include
     private final String email;
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private String login;
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private String name;
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private LocalDate birthday;
 }

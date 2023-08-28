@@ -16,10 +16,10 @@ public class Film {
     private Long id;
     @EqualsAndHashCode.Include
     private final String name;
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private String description;
     @EqualsAndHashCode.Include
     private final LocalDate releaseDate;
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private Integer duration;
 }

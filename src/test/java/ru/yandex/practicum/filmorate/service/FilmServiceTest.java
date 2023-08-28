@@ -61,16 +61,14 @@ public class FilmServiceTest {
 
         filmService.addNewFilm(filmOne);
 
-        filmOne.setId(2L);
-        filmOne.setDescription("a direct prequel to the 1982 film");
-        filmOne.setDuration(103);
+        Film filmTwo = new Film(1L, "The Thing 2011", "a direct prequel to the 1982 film", LocalDate.of(2011, 10, 6), 103);
 
-        Film filmUpdate = filmService.updateFilm(filmOne);
+        Film filmUpdate = filmService.updateFilm(filmTwo);
 
-        assertEquals(filmOne, filmUpdate);
-
+        assertEquals(filmTwo, filmUpdate);
         List<Film> allFilms = filmService.getAllFilms();
         assertEquals(1, allFilms.size());
+        assertEquals(filmTwo, allFilms.get(0));
     }
 
     @Test
