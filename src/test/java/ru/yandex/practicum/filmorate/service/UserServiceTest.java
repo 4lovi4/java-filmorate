@@ -111,7 +111,7 @@ public class UserServiceTest {
     @DisplayName("Исключение: при изменении неизвестного пользователя")
     void shouldThrowExceptionOnNonExistingUserUpdate() {
         User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(1988, 6, 25));
-        assertThrows(ValidationException.class, () -> userService.updateUser(userOne));
+        assertThrows(NotFoundException.class, () -> userService.updateUser(userOne));
     }
 
     @ParameterizedTest

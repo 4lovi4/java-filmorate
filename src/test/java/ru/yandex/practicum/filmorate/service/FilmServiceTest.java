@@ -119,7 +119,7 @@ public class FilmServiceTest {
     @DisplayName("Исключение: name при изменении нет такого фильма в сервисе")
     void shouldThrowExceptionOnUnknownFilm() {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
-        assertThrows(ValidationException.class, () -> filmService.updateFilm(filmOne));
+        assertThrows(NotFoundException.class, () -> filmService.updateFilm(filmOne));
     }
 
     @ParameterizedTest
