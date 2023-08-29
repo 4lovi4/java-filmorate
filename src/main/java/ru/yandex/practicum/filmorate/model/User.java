@@ -20,6 +20,7 @@ public class User {
     @NotBlank(message = "Поле email не может быть пустым")
     @Email(message = "email должен соответствовать паттерну name@domen.zone и содержать @")
     private final String email;
+    @NotBlank(message = "Поле login не может быть пустым")
     @Pattern(regexp = "^\\S+$", message = "login не должен содержать пробелы")
     private String login;
     private String name;

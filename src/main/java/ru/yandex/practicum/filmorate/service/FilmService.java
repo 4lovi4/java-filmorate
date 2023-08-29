@@ -39,7 +39,7 @@ public class FilmService {
 
     public Film addNewFilm(Film film) {
         log.debug("Запрос на добавление фильма: " + film);
-        filmValidator.validate(film);
+//        filmValidator.validate(film);
         Long currentId = filmCounter;
         if (!films.containsKey(film.getId()) || !films.values().contains(film)) {
             if (Objects.isNull(film.getId())) {
@@ -52,7 +52,7 @@ public class FilmService {
             films.put(currentId, film);
         } else {
             log.error("Фильм уже добавлен в сервис");
-            throw new ValidationException("Фильм уже добавлен");
+            throw new InstanceAlreadyExistsException("Фильм уже добавлен");
         }
         log.debug("Добавлен фильм: " + film);
         return film;
@@ -60,7 +60,7 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.debug("Запрос на изменение фильма: " + film);
-        filmValidator.validate(film);
+//        filmValidator.validate(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
         } else {

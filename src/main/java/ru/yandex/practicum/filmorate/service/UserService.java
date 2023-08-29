@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
-import ru.yandex.practicum.filmorate.validator.ValidationException;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -33,13 +32,20 @@ public class UserService {
         this.userCount = (long) users.keySet().size();
     }
 
+    private void checkUserName(User user) {
+        if (Objects.isNull(user.getName()) || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+    }
+
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
 
     public User addNewUser(User user) {
         log.debug("Запрос на добавление пользователя: " + user);
-        userValidator.validate(user);
+        checkUserName(user);
+//        userValidator.validate(user);
         Long currentId = userCount;
         if (!users.containsKey(user.getId()) || !users.values().contains(user)) {
             if (Objects.isNull(user.getId())) {
@@ -52,7 +58,7 @@ public class UserService {
             users.put(currentId, user);
         } else {
             log.error("Пользователь уже добавлен в сервисе");
-            throw new ValidationException("Пользователь уже добавлен");
+            throw new InstanceAlreadyExistsException("Пользователь уже добавлен");
         }
         log.debug("Добавлен пользователь: " + user);
         return user;
@@ -60,7 +66,8 @@ public class UserService {
 
     public User updateUser(User user) {
         log.debug("Запрос на изменение пользователя: " + user);
-        userValidator.validate(user);
+        checkUserName(user);
+//        userValidator.validate(user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
         } else {
