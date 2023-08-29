@@ -6,9 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.yandex.practicum.filmorate.FilmorateApplicationTests;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validator.ValidationException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -76,7 +76,7 @@ public class FilmServiceTest extends FilmorateApplicationTests {
     void shouldThrowExceptionOnRepeatAdd() {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
         filmService.addNewFilm(filmOne);
-        assertThrows(ValidationException.class, () -> filmService.addNewFilm(filmOne));
+        assertThrows(InstanceAlreadyExistsException.class, () -> filmService.addNewFilm(filmOne));
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ public class FilmServiceTest extends FilmorateApplicationTests {
     @ValueSource(strings = {"", "   "})
     void shouldThrowExceptionOnBlankName(String name) {
         Film filmOne = new Film(1L, name, "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
-        assertThrows(ValidationException.class, () -> filmService.addNewFilm(filmOne));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.addNewFilm(filmOne));
     }
 
     @Test
@@ -94,22 +94,22 @@ public class FilmServiceTest extends FilmorateApplicationTests {
         String description = "Production began in the mid-1970s as a faithful adaptation of the novella, following 1951's The Thing from Another World. The Thing went through several directors and writers, each with different ideas on how to approach the story. Filming lasted roughly twelve weeks, beginning in August 1981, and took place on refrigerated sets in Los Angeles as well as in Juneau, Alaska, and Stewart, British Columbia. Of the film's $15 million budget, $1.5 million was spent on Rob Bottin's creature effects, a mixture of chemicals, food products, rubber, and mechanical parts turned by his large team into an alien capable of taking on any form.";
         filmOne.setDescription(description);
         assertTrue(filmOne.getDescription().length() > 200);
-        assertThrows(ValidationException.class, () -> filmService.addNewFilm(filmOne));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.addNewFilm(filmOne));
     }
 
     @Test
     @DisplayName("Исключение: releaseDate при добавлении не может быть старше 1895-12-28")
     void shouldThrowValidationExceptionOnReleaseDateTooOld() {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1882, 6, 25), 109);
-        assertThrows(ValidationException.class, () -> filmService.addNewFilm(filmOne));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.addNewFilm(filmOne));
     }
 
     @ParameterizedTest
     @DisplayName("Исключение: duration при добавлении должно быть больше 0")
     @ValueSource(ints = {0, -100})
-    void shouldThrowValidationExceptionOnReleaseDateTooOld(int duration) {
+    void shouldThrowValidationExceptionOnNonPositiveDuration(int duration) {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), duration);
-        assertThrows(ValidationException.class, () -> filmService.addNewFilm(filmOne));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.addNewFilm(filmOne));
     }
 
 
@@ -127,7 +127,7 @@ public class FilmServiceTest extends FilmorateApplicationTests {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
         filmService.addNewFilm(filmOne);
         Film filmTwo = new Film(1L, name, "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
-        assertThrows(ValidationException.class, () -> filmService.updateFilm(filmTwo));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.updateFilm(filmTwo));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class FilmServiceTest extends FilmorateApplicationTests {
         String description = "Production began in the mid-1970s as a faithful adaptation of the novella, following 1951's The Thing from Another World. The Thing went through several directors and writers, each with different ideas on how to approach the story. Filming lasted roughly twelve weeks, beginning in August 1981, and took place on refrigerated sets in Los Angeles as well as in Juneau, Alaska, and Stewart, British Columbia. Of the film's $15 million budget, $1.5 million was spent on Rob Bottin's creature effects, a mixture of chemicals, food products, rubber, and mechanical parts turned by his large team into an alien capable of taking on any form.";
         filmOne.setDescription(description);
         assertTrue(filmOne.getDescription().length() > 200);
-        assertThrows(ValidationException.class, () -> filmService.updateFilm(filmOne));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.updateFilm(filmOne));
     }
 
     @Test
@@ -147,7 +147,7 @@ public class FilmServiceTest extends FilmorateApplicationTests {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 109);
         filmService.addNewFilm(filmOne);
         Film filmTwo = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1882, 6, 25), 109);
-        assertThrows(ValidationException.class, () -> filmService.updateFilm(filmTwo));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.updateFilm(filmTwo));
     }
 
     @ParameterizedTest
@@ -157,6 +157,6 @@ public class FilmServiceTest extends FilmorateApplicationTests {
         Film filmOne = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), 102);
         filmService.addNewFilm(filmOne);
         Film filmTwo = new Film(1L, "The Thing", "science fiction horror film", LocalDate.of(1982, 6, 25), duration);
-        assertThrows(ValidationException.class, () -> filmService.updateFilm(filmTwo));
+        assertThrows(MethodArgumentNotValidException.class, () -> filmService.updateFilm(filmTwo));
     }
 }
