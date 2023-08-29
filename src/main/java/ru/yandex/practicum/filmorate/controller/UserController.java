@@ -6,15 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.HashSet;
 import java.util.List;
 
 @RestController
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final HashSet<User> users = new HashSet<>();
-
     @Autowired
     private UserService userService;
 
@@ -25,9 +22,7 @@ public class UserController {
 
     @PostMapping
     public User addNewUser(@RequestBody User user) {
-        User resultUser;
-        resultUser = userService.addNewUser(user);
-        return resultUser;
+        return userService.addNewUser(user);
     }
 
     @PutMapping
