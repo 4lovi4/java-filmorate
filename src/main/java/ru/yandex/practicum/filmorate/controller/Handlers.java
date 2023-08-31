@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.service.InstanceAlreadyExistsException;
 import ru.yandex.practicum.filmorate.service.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.rmi.AlreadyBoundException;
 
 @ControllerAdvice
 @Slf4j

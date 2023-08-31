@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -18,9 +16,6 @@ public class UserService {
     private final HashMap<Long, User> users;
 
     private Long userCount;
-
-    @Autowired
-    private UserValidator userValidator;
 
     public UserService() {
         this.users = new HashMap<>();
@@ -45,7 +40,6 @@ public class UserService {
     public User addNewUser(User user) {
         log.debug("Запрос на добавление пользователя: " + user);
         checkUserName(user);
-//        userValidator.validate(user);
         Long currentId = userCount;
         if (!users.containsKey(user.getId()) || !users.values().contains(user)) {
             if (Objects.isNull(user.getId())) {
@@ -67,7 +61,6 @@ public class UserService {
     public User updateUser(User user) {
         log.debug("Запрос на изменение пользователя: " + user);
         checkUserName(user);
-//        userValidator.validate(user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
         } else {

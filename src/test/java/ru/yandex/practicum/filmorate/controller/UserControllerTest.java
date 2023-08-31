@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +20,13 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
 @AutoConfigureMockMvc
-public class UserControllerTest extends FilmorateApplicationTests {
+class UserControllerTest extends FilmorateApplicationTests {
     @Autowired
     MockMvc mockMvc;
 
@@ -105,5 +108,180 @@ public class UserControllerTest extends FilmorateApplicationTests {
                         .accept("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(filmOnePayload));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Валидация поля email не пустое или содержит символ '@' при добавлении пользователя")
+    @ValueSource(strings = {"", " ", "somedogpochta.is"})
+    void shouldInvalidateWrongEmailCreate(String email) throws Exception {
+        User userOne = new User(1L, email, "abc", "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.post(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @Test
+    @DisplayName("Валидация поля email != null при добавлении пользователя")
+    void shouldInvalidateNullEmailCreate() throws Exception {
+        User userOne = new User(1L, null, "abc", "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.post(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Валидация поля login: не пустое или не содержит пробелы при добавлении пользователя")
+    @ValueSource(strings = {"", " ", "login    1", "best login"})
+    void shouldThrowExceptionOnWrongLoginCreate(String login) throws Exception {
+        User userOne = new User(1L, "boris@razor.bum", login, "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.post(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @Test
+    @DisplayName("Валидация поля login != null при добавлении пользователя")
+    void shouldInvalidateNullLoginCreate() throws Exception {
+        User userOne = new User(1L, "dev@null.is", null, "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.post(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @Test
+    @DisplayName("Валидация поля birthday дата рождения не в будущем при добавлении пользователя")
+    void shouldThrowExceptionOnFutureBirthday() throws Exception {
+        User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(2088, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.post(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+
+    @ParameterizedTest
+    @DisplayName("Валидация поля email при изменении пользователя не пустое и содержит символ '@'")
+    @ValueSource(strings = {"", " ", "somedogpochta.is"})
+    void shouldThrowExceptionOnWrongEmailUpdate(String email) throws Exception {
+        User userOne = new User(1L, email, "abc", "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @Test
+    @DisplayName("Валидация поля email != null при изменении пользователя")
+    void shouldInvalidateNullEmailUpdate() throws Exception {
+        User userOne = new User(1L, null, "abc", "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Валидация поле login не пустое и не содержит пробелы при изменении пользователя")
+    @ValueSource(strings = {"", " ", "login    1", "best login"})
+    void shouldThrowExceptionOnWrongLoginUpdate(String login) throws Exception {
+        User userOne = new User(1L, "boris@razor.bum", login, "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @Test
+    @DisplayName("Валидация поля login != null при изменении пользователя")
+    void shouldInvalidateNullLoginUpdate() throws Exception {
+        User userOne = new User(1L, "dev@null.is", null, "Boris", LocalDate.of(1988, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
+    }
+
+    @Test
+    @DisplayName("Валидация поля birthday дата рождения не в будущем при изменении пользователя")
+    void shouldThrowExceptionOnFutureBirthdayUpdate() throws Exception {
+        User userOne = new User(1L, "abc@ya.is", "abc", "Boris", LocalDate.of(2088, 6, 25));
+        String userOnePayload = mapper.writeValueAsString(userOne);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put(serverAddress + ":" + serverPort + endpoint)
+                        .content(userOnePayload)
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .accept("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.path").value(serverAddress + ":" + serverPort + endpoint))
+                .andExpect(jsonPath("$.error").value("Ошибка валидации при запросе!"));
     }
 }

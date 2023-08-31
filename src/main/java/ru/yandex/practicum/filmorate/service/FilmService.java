@@ -1,11 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
-import ru.yandex.practicum.filmorate.validator.ValidationException;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -15,9 +12,6 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class FilmService {
-
-    @Autowired
-    private FilmValidator filmValidator;
 
     private final HashMap<Long, Film> films;
 
@@ -39,7 +33,6 @@ public class FilmService {
 
     public Film addNewFilm(Film film) {
         log.debug("Запрос на добавление фильма: " + film);
-//        filmValidator.validate(film);
         Long currentId = filmCounter;
         if (!films.containsKey(film.getId()) || !films.values().contains(film)) {
             if (Objects.isNull(film.getId())) {
@@ -60,7 +53,6 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.debug("Запрос на изменение фильма: " + film);
-//        filmValidator.validate(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
         } else {
