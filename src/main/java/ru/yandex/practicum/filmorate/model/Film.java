@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.validator.ReleaseDateConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -25,4 +26,5 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive(message = "в поле duration должно быть положительное число")
     private Integer duration;
+    private Set<Long> likes;
 }

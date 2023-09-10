@@ -1,30 +1,29 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
 
-    private final HashMap<Long, User> users;
+    private final UserStorage userStorage;
+
+    private final Map<Long, User> users;
 
     private Long userCount;
 
-    public UserService() {
+    @Autowired
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
         this.users = new HashMap<>();
-        this.userCount = 0L;
-    }
-
-    public UserService(HashMap<Long, User> users) {
-        this.users = users;
-        this.userCount = (long) users.keySet().size();
+        this.userCount = this.userStorage.getLastUserId();
     }
 
     private void checkUserName(User user) {
@@ -69,5 +68,37 @@ public class UserService {
         }
         log.debug("Изменён пользователь: " + user);
         return user;
+    }
+
+    public void addUserToFriends(Long userId, Long friendId) {
+        if (userStorage.checkUserIsPresent(userId)) {
+            throw new NotFoundException(String
+                    .format("Пользователь id = %d не найден",
+                            userId));
+        }
+        if (userStorage.checkUserIsPresent(friendId)) {
+            throw  new NotFoundException(String
+                    .format("Друг id = %d  не найден",
+                            userId));
+        }
+
+    }
+
+    public void deleteUserFromFriends(Long userId, Long friendId) {
+        throw new NotFoundException(String
+                .format("Пользователь id = %d и  не найден",
+                        userId));
+    }
+
+    public List<User> getAllUserFriends(Long userId) {
+        User user = userStorage.getUserById(userId);
+        if (Objects.isNull(user)) {
+            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
+        }
+        return (user
+                .getFriends()
+                .stream()
+                .map(u -> userStorage.getUserById(u))
+                .collect(Collectors.toList()));
     }
 }
