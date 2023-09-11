@@ -78,16 +78,26 @@ public class UserService {
         }
         if (userStorage.checkUserIsPresent(friendId)) {
             throw  new NotFoundException(String
-                    .format("Друг id = %d  не найден",
+                    .format("Друг id = %d не найден",
                             userId));
         }
-
+        User user = userStorage.getUserById(userId);
+        user.getFriends().add(friendId);
     }
 
     public void deleteUserFromFriends(Long userId, Long friendId) {
-        throw new NotFoundException(String
-                .format("Пользователь id = %d и  не найден",
-                        userId));
+        if (!userStorage.checkUserIsPresent(userId)) {
+            throw new NotFoundException(String
+                    .format("Пользователь id = %d не найден",
+                            userId));
+        }
+        if (!userStorage.checkUserIsPresent(friendId)) {
+            throw  new NotFoundException(String
+                    .format("Друг id = %d  не найден",
+                            userId));
+        }
+        User user = userStorage.getUserById(userId);
+        user.getFriends().remove(friendId);
     }
 
     public List<User> getAllUserFriends(Long userId) {
