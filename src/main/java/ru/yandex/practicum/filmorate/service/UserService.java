@@ -15,14 +15,13 @@ public class UserService {
 
     private final UserStorage userStorage;
 
-    private final Map<Long, User> users;
-
     private Long userCount;
+
+    private static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
 
     @Autowired
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
-        this.users = new HashMap<>();
         this.userCount = this.userStorage.getLastUserId();
     }
 
@@ -33,22 +32,18 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+        return userStorage.getAllUsers();
     }
 
     public User addNewUser(User user) {
         log.debug("Запрос на добавление пользователя: " + user);
         checkUserName(user);
-        Long currentId = userCount;
-        if (!users.containsKey(user.getId()) || !users.values().contains(user)) {
+        if (!userStorage.checkUserIsPresent(user.getId(), user)) {
             if (Objects.isNull(user.getId())) {
                 userCount++;
-                currentId = userCount;
-                user.setId(currentId);
-            } else {
-                currentId = user.getId();
+                user.setId(userCount);
             }
-            users.put(currentId, user);
+            userStorage.addUser(userCount, user);
         } else {
             log.error("Пользователь уже добавлен в сервисе");
             throw new InstanceAlreadyExistsException("Пользователь уже добавлен");
@@ -60,8 +55,8 @@ public class UserService {
     public User updateUser(User user) {
         log.debug("Запрос на изменение пользователя: " + user);
         checkUserName(user);
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
+        if (userStorage.checkUserIsPresent(user.getId())) {
+            userStorage.addUser(user.getId(), user);
         } else {
             log.error("Передан неизвестный пользователь для редактирования");
             throw new NotFoundException("Неизвестный пользователь");
@@ -73,13 +68,11 @@ public class UserService {
     public void addUserToFriends(Long userId, Long friendId) {
         if (userStorage.checkUserIsPresent(userId)) {
             throw new NotFoundException(String
-                    .format("Пользователь id = %d не найден",
-                            userId));
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
         }
         if (userStorage.checkUserIsPresent(friendId)) {
             throw  new NotFoundException(String
-                    .format("Друг id = %d не найден",
-                            userId));
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
         }
         User user = userStorage.getUserById(userId);
         user.getFriends().add(friendId);
@@ -88,13 +81,11 @@ public class UserService {
     public void deleteUserFromFriends(Long userId, Long friendId) {
         if (!userStorage.checkUserIsPresent(userId)) {
             throw new NotFoundException(String
-                    .format("Пользователь id = %d не найден",
-                            userId));
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
         }
         if (!userStorage.checkUserIsPresent(friendId)) {
             throw  new NotFoundException(String
-                    .format("Друг id = %d  не найден",
-                            userId));
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
         }
         User user = userStorage.getUserById(userId);
         user.getFriends().remove(friendId);
@@ -103,7 +94,7 @@ public class UserService {
     public List<User> getAllUserFriends(Long userId) {
         User user = userStorage.getUserById(userId);
         if (Objects.isNull(user)) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
         }
         return (user
                 .getFriends()
