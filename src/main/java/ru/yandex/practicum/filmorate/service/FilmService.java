@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,12 +28,19 @@ public class FilmService {
         return filmStorage.getAllFilms();
     }
 
+    public Film getFilmById(Long filmId) {
+        Film film = filmStorage.getFilmById(filmId);
+        if (Objects.isNull(film)) {
+            throw new NotFoundException("Не найден фильм id = " + filmId);
+        }
+        return film;
+    }
+
     public Film addNewFilm(Film film) {
         log.debug("Запрос на добавление фильма: " + film);
-        Long currentId = filmCounter;
-        if (filmStorage.checkFilmIsPresent(film.getId(), film)) {
+        if (!filmStorage.checkFilmIsPresent(film.getId(), film)) {
             if (Objects.isNull(film.getId())) {
-                film.setId(getFilmId());
+                film.setId(getNewFilmId());
             }
             filmStorage.addFilm(film.getId(), film);
         } else {
@@ -45,7 +53,7 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.debug("Запрос на изменение фильма: " + film);
-        if (filmStorage.checkFilmIsPresent(film.getId(), film)) {
+        if (filmStorage.checkFilmIsPresent(film.getId())) {
             filmStorage.addFilm(film.getId(), film);
         } else {
             log.error("Неизвестный фильм передан для редактирования");
@@ -55,7 +63,39 @@ public class FilmService {
         return film;
     }
 
-    private Long getFilmId() {
-        return ++filmCounter;
+    public Film addLikeToFilm(Long filmId, Long userId) {
+        if (!filmStorage.checkFilmIsPresent(filmId)) {
+            throw new NotFoundException(String.format("Фильм id %d не найден", filmId));
+        }
+        Film film = filmStorage.getFilmById(filmId);
+        film.getLikes().add(userId);
+        return film;
+    }
+
+    public Film removeLikeFromFilm(Long filmId, Long userId) {
+        if (!filmStorage.checkFilmIsPresent(filmId)) {
+            throw new NotFoundException(String.format("Фильм id %d не найден", filmId));
+        }
+        Film film = filmStorage.getFilmById(filmId);
+        film.getLikes().remove(userId);
+        return film;
+    }
+
+    public List<Film> getPopularFilmsByLikes(Long count) {
+        count = Objects.isNull(count) ? 10L : count;
+        return filmStorage.getAllFilms()
+                .stream()
+                .sorted((f1, f2) ->
+                        Integer.compare(
+                                f2.getLikes().size(),
+                                f1.getLikes().size()
+                        ))
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    private Long getNewFilmId() {
+        this.filmCounter++;
+        return filmCounter;
     }
 }

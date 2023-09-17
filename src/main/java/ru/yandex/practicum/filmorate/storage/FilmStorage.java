@@ -7,11 +7,17 @@ import java.util.List;
 public interface FilmStorage {
     List<Film> getAllFilms();
 
+    Film getFilmById(Long filmId);
+
     void addFilm(Long filmId, Film film);
 
     boolean checkFilmIsPresent(Long filmId, Film film);
 
+    boolean checkFilmIsPresent(Long filmId);
+
     boolean deleteFilm(Long filmId, Film film);
+
+    Film deleteFilm(Long filmId);
 
     Long getLastFilmId();
 }

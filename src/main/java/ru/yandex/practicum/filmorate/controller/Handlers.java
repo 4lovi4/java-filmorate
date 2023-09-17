@@ -16,36 +16,39 @@ import javax.servlet.http.HttpServletRequest;
 @ControllerAdvice
 @Slf4j
 public class Handlers {
+
+    private static final String ERROR_LOG_TEMPLATE = "Request: %s raised %s";
+    private static final String ERROR_PAYLOAD_TEMPLATE = "{\"path\": \"%s\", \"error\": \"%s\"}";
+    private static final String HEADER_KEY = "Content-Type";
+    private static final String HEADER_VALUE = "application/json";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity handleValidationError(HttpServletRequest request, Exception exception) {
-        log.error("Request: " + request.getRequestURL() + " raised " + exception);
-        String payload = "{\"path\":" + "\"" + request.getRequestURL() + "\"" + ",\"error\": \"Ошибка валидации при запросе!\"}";
+    ResponseEntity<String> handleValidationError(HttpServletRequest request, Exception exception) {
+        log.error(String.format(ERROR_LOG_TEMPLATE, request.getRequestURL(), exception));
+        String payload = String.format(ERROR_PAYLOAD_TEMPLATE, request.getRequestURL(), "Ошибка валидации при запросе!");
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        ResponseEntity errorResponse = new ResponseEntity<>(payload, headers, HttpStatus.BAD_REQUEST);
-        return errorResponse;
-    }
-
-    @ExceptionHandler(InstanceAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    ResponseEntity handleNotFoundError(HttpServletRequest request, Exception exception) {
-        log.error("Request: " + request.getRequestURL() + " raised " + exception);
-        String payload = "{\"path\":" + "\"" + request.getRequestURL() + "\"" + ",\"error\":\"Объект не найден на сервере!\"}";
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        ResponseEntity errorResponse = new ResponseEntity<>(payload, headers, HttpStatus.NOT_FOUND);
-        return errorResponse;
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(payload, headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity handleAlreadyExistsException(HttpServletRequest request, Exception exception) {
-        log.error("Request: " + request.getRequestURL() + " raised " + exception);
-        String payload = "{\"path\":" + "\"" + request.getRequestURL() + "\"" + ",\"error\":\"Объект уже существует на сервере!\"}";
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ResponseEntity<String> handleNotFoundError(HttpServletRequest request, Exception exception) {
+        log.error(String.format(ERROR_LOG_TEMPLATE, request.getRequestURL(), exception));
+        String payload = String.format(ERROR_PAYLOAD_TEMPLATE, request.getRequestURL(), "Объект не найден на сервере!");
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        ResponseEntity errorResponse = new ResponseEntity<>(payload, headers, HttpStatus.NOT_FOUND);
-        return errorResponse;
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(payload, headers, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InstanceAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleAlreadyExistsException(HttpServletRequest request, Exception exception) {
+        log.error(String.format(ERROR_LOG_TEMPLATE, request.getRequestURL(), exception));
+        String payload = String.format(ERROR_PAYLOAD_TEMPLATE, request.getRequestURL(), "Объект уже существует на сервере!");
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(payload, headers, HttpStatus.NOT_FOUND);
     }
 }

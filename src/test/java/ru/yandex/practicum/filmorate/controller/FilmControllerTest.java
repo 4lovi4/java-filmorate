@@ -114,8 +114,8 @@ class FilmControllerTest extends FilmorateApplicationTests {
     @DisplayName("Валидация поля name")
     @ValueSource(strings = {"", "   "})
     void shouldInvalidateEmptyNameCreate(String name) throws Exception {
-        Film filmOne = new Film(null, name, "cccc", LocalDate.of(1975, 6, 1), 105);
-
+        Film filmOne = new Film(0L, name, "cccc", LocalDate.of(1975, 6, 1), 105);
+        filmOne.setId(null);
         String filmOnePayload = mapper.writeValueAsString(filmOne);
 
         mockMvc
@@ -132,7 +132,8 @@ class FilmControllerTest extends FilmorateApplicationTests {
     @Test
     @DisplayName("Валидация поля name = null")
     void shouldInvalidateNullNameCreate() throws Exception {
-        Film filmOne = new Film(null, null, "cccc", LocalDate.of(1975, 6, 1), 105);
+        Film filmOne = new Film(0L, null, "cccc", LocalDate.of(1975, 6, 1), 105);
+        filmOne.setId(null);
 
         String filmOnePayload = mapper.writeValueAsString(filmOne);
 
