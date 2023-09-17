@@ -50,6 +50,7 @@ public class UserController {
                                      @PathVariable("friendId") Long friendId) {
         userService.deleteUserFromFriends(userId, friendId);
     }
+
     @GetMapping("/{id}/friends")
     public List<User> findUserFriends(@PathVariable("id") Long userId) {
         return userService.getAllUserFriends(userId);
