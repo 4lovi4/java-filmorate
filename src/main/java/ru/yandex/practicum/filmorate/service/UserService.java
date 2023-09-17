@@ -17,7 +17,7 @@ public class UserService {
 
     private Long userCounter;
 
-    private static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
+    public static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -38,13 +38,13 @@ public class UserService {
     public User getUserById(Long userId) {
         User user = userStorage.getUserById(userId);
         if (Objects.isNull(user)) {
-            throw new NotFoundException("Не найден пользователь id = " + userId);
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
         }
         return user;
     }
 
     public User addNewUser(User user) {
-        log.debug("Запрос на добавление пользователя: " + user);
+        log.info("Запрос на добавление пользователя: " + user);
         checkUserName(user);
         if (!userStorage.checkUserIsPresent(user.getId(), user)) {
             if (Objects.isNull(user.getId())) {
@@ -55,20 +55,20 @@ public class UserService {
             log.error("Пользователь уже добавлен в сервисе");
             throw new InstanceAlreadyExistsException("Пользователь уже добавлен");
         }
-        log.debug("Добавлен пользователь: " + user);
+        log.info("Добавлен пользователь: " + user);
         return user;
     }
 
     public User updateUser(User user) {
-        log.debug("Запрос на изменение пользователя: " + user);
+        log.info("Запрос на изменение пользователя: " + user);
         checkUserName(user);
         if (userStorage.checkUserIsPresent(user.getId())) {
             userStorage.addUser(user.getId(), user);
         } else {
             log.error("Передан неизвестный пользователь для редактирования");
-            throw new NotFoundException("Неизвестный пользователь");
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, user.getId()));
         }
-        log.debug("Изменён пользователь: " + user);
+        log.info("Изменён пользователь: " + user);
         return user;
     }
 

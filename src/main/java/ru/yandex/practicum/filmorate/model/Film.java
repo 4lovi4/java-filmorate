@@ -29,10 +29,10 @@ public class Film {
     private Set<Long> likes;
 
     public Film() {
-        this.name = "";
+        this.name = "1";
         this.releaseDate = LocalDate
                 .parse("1895-12-28", DateTimeFormatter.ISO_LOCAL_DATE);
-        this.duration = 0;
+        this.duration = 1;
         this.likes = new HashSet<>();
     }
 

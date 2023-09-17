@@ -18,6 +18,8 @@ public class FilmService {
 
     private Long filmCounter;
 
+    private static final String FILM_NOT_FOUND_MESSAGE = "Фильм id = %d не найден";
+
     @Autowired
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
@@ -31,13 +33,13 @@ public class FilmService {
     public Film getFilmById(Long filmId) {
         Film film = filmStorage.getFilmById(filmId);
         if (Objects.isNull(film)) {
-            throw new NotFoundException("Не найден фильм id = " + filmId);
+            throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
         return film;
     }
 
     public Film addNewFilm(Film film) {
-        log.debug("Запрос на добавление фильма: " + film);
+        log.info("Запрос на добавление фильма: " + film);
         if (!filmStorage.checkFilmIsPresent(film.getId(), film)) {
             if (Objects.isNull(film.getId())) {
                 film.setId(getNewFilmId());
@@ -47,25 +49,25 @@ public class FilmService {
             log.error("Фильм уже добавлен в сервис");
             throw new InstanceAlreadyExistsException("Фильм уже добавлен");
         }
-        log.debug("Добавлен фильм: " + film);
+        log.info("Добавлен фильм: " + film);
         return film;
     }
 
     public Film updateFilm(Film film) {
-        log.debug("Запрос на изменение фильма: " + film);
+        log.info("Запрос на изменение фильма: " + film);
         if (filmStorage.checkFilmIsPresent(film.getId())) {
             filmStorage.addFilm(film.getId(), film);
         } else {
             log.error("Неизвестный фильм передан для редактирования");
-            throw new NotFoundException("В запросе передан неизвестный фильм для редактирования");
+            throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, film.getId()));
         }
-        log.debug("Изменён фильм: " + film);
+        log.info("Изменён фильм: " + film);
         return film;
     }
 
     public Film addLikeToFilm(Long filmId, Long userId) {
         if (!filmStorage.checkFilmIsPresent(filmId)) {
-            throw new NotFoundException(String.format("Фильм id %d не найден", filmId));
+            throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
         Film film = filmStorage.getFilmById(filmId);
         film.getLikes().add(userId);
@@ -74,7 +76,7 @@ public class FilmService {
 
     public Film removeLikeFromFilm(Long filmId, Long userId) {
         if (!filmStorage.checkFilmIsPresent(filmId)) {
-            throw new NotFoundException(String.format("Фильм id %d не найден", filmId));
+            throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
         Film film = filmStorage.getFilmById(filmId);
         film.getLikes().remove(userId);

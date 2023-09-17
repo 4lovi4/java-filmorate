@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.NotFoundException;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import static ru.yandex.practicum.filmorate.service.UserService.USER_NOT_FOUND_MESSAGE;
+
 import javax.validation.Valid;
 import java.util.List;
 
@@ -50,7 +52,7 @@ public class FilmController {
     public Film addLikeToFilm(@PathVariable("id") Long filmId,
                               @PathVariable("userId") Long userId) {
         if (!userService.isUserPresent(userId)) {
-            throw new NotFoundException(String.format("Пользователь id %d не найден", userId));
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
         }
         return filmService.addLikeToFilm(filmId, userId);
     }
@@ -59,7 +61,7 @@ public class FilmController {
     public Film removeLikeFromFilm(@PathVariable("id") Long filmId,
                               @PathVariable("userId") Long userId) {
         if (!userService.isUserPresent(userId)) {
-            throw new NotFoundException(String.format("Пользователь id %d не найден", userId));
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
         }
         return filmService.removeLikeFromFilm(filmId, userId);
     }

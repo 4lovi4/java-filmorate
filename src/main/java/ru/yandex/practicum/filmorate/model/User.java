@@ -30,7 +30,7 @@ public class User {
     private Set<Long> friends;
 
     public User() {
-        this.email = "";
+        this.email = "1";
         this.friends = new HashSet<>();
     }
 
