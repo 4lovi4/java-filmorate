@@ -21,8 +21,7 @@ public class FilmController {
 
     @Autowired
     public FilmController(FilmService filmService,
-                          UserService userService)
-    {
+                          UserService userService) {
         this.filmService = filmService;
         this.userService = userService;
     }
