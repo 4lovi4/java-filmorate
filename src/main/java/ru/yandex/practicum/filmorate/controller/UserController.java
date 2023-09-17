@@ -14,8 +14,13 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    @Autowired
+
     private UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> findAllUsers() {
