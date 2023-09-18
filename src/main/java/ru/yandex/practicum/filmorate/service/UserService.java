@@ -1,30 +1,28 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
 
-    private final HashMap<Long, User> users;
+    private final UserStorage userStorage;
 
-    private Long userCount;
+    private Long userCounter;
 
-    public UserService() {
-        this.users = new HashMap<>();
-        this.userCount = 0L;
-    }
+    public static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
 
-    public UserService(HashMap<Long, User> users) {
-        this.users = users;
-        this.userCount = (long) users.keySet().size();
+    @Autowired
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
+        this.userCounter = this.userStorage.getLastUserId();
     }
 
     private void checkUserName(User user) {
@@ -34,40 +32,116 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+        return userStorage.getAllUsers();
+    }
+
+    public User getUserById(Long userId) {
+        User user = userStorage.getUserById(userId);
+        if (Objects.isNull(user)) {
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        return user;
     }
 
     public User addNewUser(User user) {
-        log.debug("Запрос на добавление пользователя: " + user);
+        log.info("Запрос на добавление пользователя: " + user);
         checkUserName(user);
-        Long currentId = userCount;
-        if (!users.containsKey(user.getId()) || !users.values().contains(user)) {
+        if (!userStorage.checkUserIsPresent(user.getId(), user)) {
             if (Objects.isNull(user.getId())) {
-                userCount++;
-                currentId = userCount;
-                user.setId(currentId);
-            } else {
-                currentId = user.getId();
+                user.setId(getNewUserId());
             }
-            users.put(currentId, user);
+            userStorage.addUser(user.getId(), user);
         } else {
             log.error("Пользователь уже добавлен в сервисе");
             throw new InstanceAlreadyExistsException("Пользователь уже добавлен");
         }
-        log.debug("Добавлен пользователь: " + user);
+        log.info("Добавлен пользователь: " + user);
         return user;
     }
 
     public User updateUser(User user) {
-        log.debug("Запрос на изменение пользователя: " + user);
+        log.info("Запрос на изменение пользователя: " + user);
         checkUserName(user);
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
+        if (userStorage.checkUserIsPresent(user.getId())) {
+            userStorage.addUser(user.getId(), user);
         } else {
             log.error("Передан неизвестный пользователь для редактирования");
-            throw new NotFoundException("Неизвестный пользователь");
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, user.getId()));
         }
-        log.debug("Изменён пользователь: " + user);
+        log.info("Изменён пользователь: " + user);
         return user;
+    }
+
+    public void addUserToFriends(Long userId, Long friendId) {
+        if (!userStorage.checkUserIsPresent(userId)) {
+            throw new NotFoundException(String
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        if (!userStorage.checkUserIsPresent(friendId)) {
+            throw  new NotFoundException(String
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        User user = userStorage.getUserById(userId);
+        User friend = userStorage.getUserById(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+    }
+
+    public void deleteUserFromFriends(Long userId, Long friendId) {
+        if (!userStorage.checkUserIsPresent(userId)) {
+            throw new NotFoundException(String
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        if (!userStorage.checkUserIsPresent(friendId)) {
+            throw  new NotFoundException(String
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        User user = userStorage.getUserById(userId);
+        User friend = userStorage.getUserById(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+    }
+
+    public List<User> getAllUserFriends(Long userId) {
+        User user = userStorage.getUserById(userId);
+        if (Objects.isNull(user)) {
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        return (user
+                .getFriends()
+                .stream()
+                .map(userStorage::getUserById)
+                .collect(Collectors.toList()));
+    }
+
+    public List<User> getCommonFriendsForUsers(Long userId, Long otherUserId) {
+        if (!userStorage.checkUserIsPresent(userId)) {
+            throw new NotFoundException(String
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+        if (!userStorage.checkUserIsPresent(otherUserId)) {
+            throw  new NotFoundException(String
+                    .format(USER_NOT_FOUND_MESSAGE, userId));
+        }
+
+        User user = userStorage.getUserById(userId);
+        User otherUser = userStorage.getUserById(otherUserId);
+
+        return user.getFriends()
+                .stream()
+                .filter(friendId -> otherUser
+                        .getFriends()
+                        .contains(friendId)
+                ).map(userStorage::getUserById
+                ).collect(Collectors.toList());
+    }
+
+    public boolean isUserPresent(Long userId) {
+        return userStorage.checkUserIsPresent(userId);
+    }
+
+    private Long getNewUserId() {
+        this.userCounter++;
+        return userCounter;
     }
 }
