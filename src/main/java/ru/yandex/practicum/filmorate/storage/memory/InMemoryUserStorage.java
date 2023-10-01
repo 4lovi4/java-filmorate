@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.memory;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +26,9 @@ public class InMemoryUserStorage implements UserStorage {
         return usersInMemory.get(userId);
     }
 
-    public void addUser(Long userId, User user) {
+    public Long addUser(Long userId, User user) {
         usersInMemory.put(userId, user);
+        return userId;
     }
 
     public boolean deleteUser(Long userId, User user) {

@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@AllArgsConstructor
 public class Film {
     @EqualsAndHashCode.Exclude
     @Nullable
@@ -27,6 +28,10 @@ public class Film {
     private final Integer duration;
     @EqualsAndHashCode.Exclude
     private Set<Long> likes;
+    @EqualsAndHashCode.Exclude
+    private Set<Genre> genres;
+    @EqualsAndHashCode.Exclude
+    private Rating rating;
 
     public Film() {
         this.name = "1";
@@ -50,6 +55,16 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.likes = new HashSet<>();
+    }
+
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, String rating) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.rating = Rating.valueOfRating(rating);
         this.likes = new HashSet<>();
     }
 }

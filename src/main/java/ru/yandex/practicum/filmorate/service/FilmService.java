@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService {
-
     private final FilmStorage filmStorage;
 
     private Long filmCounter;
@@ -21,7 +21,7 @@ public class FilmService {
     private static final String FILM_NOT_FOUND_MESSAGE = "Фильм id = %d не найден";
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(@Qualifier("dataBaseFilmStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
         this.filmCounter = this.filmStorage.getLastFilmId();
     }

@@ -9,9 +9,9 @@ public interface FilmStorage {
 
     Film getFilmById(Long filmId);
 
-    void addFilm(Long filmId, Film film);
-
     boolean checkFilmIsPresent(Long filmId, Film film);
+
+    Long addFilm(Long filmId, Film film);
 
     boolean checkFilmIsPresent(Long filmId);
 
