@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
 id INT PRIMARY KEY auto_increment,
 email VARCHAR(128) NOT NULL UNIQUE,
 login VARCHAR(128) NOT NULL,
+name VARCHAR(128),
 birthday DATE);
 
 CREATE TABLE IF NOT EXISTS friends (

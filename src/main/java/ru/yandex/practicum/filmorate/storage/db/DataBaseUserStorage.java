@@ -5,6 +5,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import javax.sql.RowSet;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Component("dataBaseUserStorage")
@@ -15,8 +19,19 @@ public class DataBaseUserStorage implements UserStorage {
         this.userTemplate = jdbcTemplate;
     }
 
+    private User mapUser(ResultSet rs) throws SQLException {
+        Long id = rs.getLong("id");
+        String email = rs.getString("email");
+        String login = rs.getString("login");
+        String name = rs.getString("name");
+        LocalDate birthday = rs.getDate("birthday").toLocalDate();
+
+        return new User(id, email, login, name, birthday);
+    }
+
     @Override
     public List<User> getAllUsers() {
+        String sql = "select from * from users u";
         return null;
     }
 
