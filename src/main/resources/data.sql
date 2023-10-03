@@ -28,11 +28,11 @@ VALUES (1, 'G'),
 (5, 'NC-17');
 
 
-INSERT INTO USERS (email, login, BIRTHDAY)
-VALUES ('alex@mail.il', 'alex', '2000-12-01'),
-('maria@mail.il', 'maria', '2001-12-02'),
-('bob@mail.il', 'bob', '2005-10-01'),
-('alisa@mail.il', 'alisa', '2004-01-01');
+INSERT INTO USERS (email, login, BIRTHDAY, NAME)
+VALUES ('alex@mail.il', 'alex', '2000-12-01', 'Алексей Фролович'),
+('maria@mail.il', 'maria', '2001-12-02', 'Мария Простая'),
+('bob@mail.il', 'bob', '2005-10-01', 'Marley'),
+('alisa@mail.il', 'alisa', '2004-01-01', 'Wonder');
 
 
 INSERT INTO FILMS(name, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID)
@@ -54,4 +54,3 @@ INSERT INTO FILMS_GENRES VALUES
 INSERT INTO FILMS_GENRES VALUES
 ((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 2),
 ((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 9);
-
