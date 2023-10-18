@@ -34,18 +34,19 @@ public class DataBaseUserStorage implements UserStorage {
 
     private Set<Long> getFriendsByUserId(Long userId) {
         String sql = "select user_id from friends f where f.user_id = ? and approved = true";
-        return new HashSet<>();
+        return new HashSet<>(userTemplate.queryForList(sql, Long.class));
     }
 
     @Override
     public List<User> getAllUsers() {
-        String sql = "select from * from users u";
-        return new ArrayList<>();
+        String sql = "select from * from users";
+        return userTemplate.query(sql, (rs, rowNum) -> mapUser(rs));
     }
 
     @Override
     public User getUserById(Long userId) {
-        return null;
+        String sql = "select from * from users where id = ?";
+        return userTemplate.queryForObject(sql, (rs, rowNum) -> mapUser(rs), userId);
     }
 
     @Override
