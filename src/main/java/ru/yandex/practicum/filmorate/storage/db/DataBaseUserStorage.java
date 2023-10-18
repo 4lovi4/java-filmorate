@@ -9,7 +9,10 @@ import javax.sql.RowSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component("dataBaseUserStorage")
 public class DataBaseUserStorage implements UserStorage {
@@ -29,10 +32,15 @@ public class DataBaseUserStorage implements UserStorage {
         return new User(id, email, login, name, birthday);
     }
 
+    private Set<Long> getFriendsByUserId(Long userId) {
+        String sql = "select user_id from friends f where f.user_id = ? and approved = true";
+        return new HashSet<>();
+    }
+
     @Override
     public List<User> getAllUsers() {
         String sql = "select from * from users u";
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -46,8 +54,8 @@ public class DataBaseUserStorage implements UserStorage {
     }
 
     @Override
-    public User deleteUser(Long userId) {
-        return null;
+    public int deleteUser(Long userId) {
+        return 0;
     }
 
     @Override

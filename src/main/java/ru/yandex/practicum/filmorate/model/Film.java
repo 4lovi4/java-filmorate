@@ -25,13 +25,13 @@ public class Film {
     @ReleaseDateConstraint
     private final LocalDate releaseDate;
     @Positive(message = "в поле duration должно быть положительное число")
-    private final Integer duration;
+    private final int duration;
     @EqualsAndHashCode.Exclude
     private Set<Long> likes;
     @EqualsAndHashCode.Exclude
     private Set<Genre> genres;
     @EqualsAndHashCode.Exclude
-    private Rating rating;
+    private Rating mpa;
 
     public Film() {
         this.name = "1";
@@ -58,13 +58,13 @@ public class Film {
         this.likes = new HashSet<>();
     }
 
-    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, String rating) {
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, String mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.rating = Rating.valueOfRating(rating);
+        this.mpa = Rating.valueOfName(mpa);
         this.likes = new HashSet<>();
     }
 }

@@ -1,25 +1,41 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum Genre {
-    COMEDY("Комедия"),
-    DRAMA("Драма"),
-    CARTOON("Мультфильм"),
-    THRILLER("Триллер"),
-    DOC("Документальный"),
-    ACTION("Боевик"),
-    MILITARY("Военный"),
-    DETECTIVE("Детектив"),
-    FICTION("Фантастика");
+    COMEDY(1, "Комедия"),
+    DRAMA(2, "Драма"),
+    CARTOON(3,"Мультфильм"),
+    THRILLER(4,"Триллер"),
+    DOC(5,"Документальный"),
+    ACTION(6,"Боевик"),
+    MILITARY(7,"Военный"),
+    DETECTIVE(8,"Детектив"),
+    FICTION(9,"Фантастика");
 
-    public final String genre;
+    @JsonProperty("id")
+    public final int genreId;
+    @JsonProperty("name")
+    public final String genreName;
 
-    Genre(String genre) {
-        this.genre = genre;
+
+    Genre(int genreId, String name) {
+        this.genreId = genreId;
+        this.genreName = name;
     }
 
-    public static Genre valueOfGenre(String genre) {
+    public static Genre valueOfName(String genreName) {
         for (Genre g : values()) {
-            if (g.genre.equals(genre)) {
+            if (g.genreName.equals(genreName)) {
+                return g;
+            }
+        }
+        return null;
+    }
+
+    public static Genre valueOfId(int genreId) {
+        for (Genre g : values()) {
+            if (g.genreId == genreId) {
                 return g;
             }
         }
@@ -28,6 +44,6 @@ public enum Genre {
 
     @Override
     public String toString() {
-        return this.genre;
+        return this.genreName;
     }
 }

@@ -13,7 +13,7 @@ public interface UserStorage {
 
     boolean deleteUser(Long userId, User user);
 
-    User deleteUser(Long userId);
+    int deleteUser(Long userId);
 
     boolean checkUserIsPresent(Long userId, User user);
 

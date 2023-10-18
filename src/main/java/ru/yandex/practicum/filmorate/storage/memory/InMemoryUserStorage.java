@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -35,8 +32,8 @@ public class InMemoryUserStorage implements UserStorage {
         return usersInMemory.remove(userId, user);
     }
 
-    public User deleteUser(Long userId) {
-        return usersInMemory.remove(userId);
+    public int deleteUser(Long userId) {
+        return Objects.isNull(usersInMemory.remove(userId)) ? 0 : 1;
     }
 
     public boolean checkUserIsPresent(Long userId, User user) {

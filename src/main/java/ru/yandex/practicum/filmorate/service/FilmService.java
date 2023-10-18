@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
@@ -94,6 +95,10 @@ public class FilmService {
                         ))
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    public Rating getMpaById(int mpaId) {
+        return null;
     }
 
     private Long getNewFilmId() {

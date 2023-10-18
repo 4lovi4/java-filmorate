@@ -1,21 +1,36 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum Rating {
-    G("G"),
-    PG("PG"),
-    PG_13("PG-13"),
-    R("R"),
-    NC_17("NC-17");
+    G(1, "G"),
+    PG(2, "PG"),
+    PG_13(3, "PG-13"),
+    R(4, "R"),
+    NC_17(5, "NC-17");
 
-    public final String rating;
+    @JsonProperty("id")
+    public final int ratingId;
+    @JsonProperty("name")
+    public final String ratingName;
 
-    Rating(String rating) {
-        this.rating = rating;
+    Rating(int ratingId, String ratingName) {
+        this.ratingId = ratingId;
+        this.ratingName = ratingName;
     }
 
-    public static Rating valueOfRating(String rating) {
+    public static Rating valueOfName(String ratingName) {
         for (Rating r : values()) {
-            if (r.rating.equals(rating)) {
+            if (r.ratingName.equals(ratingName)) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public static Rating valueOfId(int ratingId) {
+        for (Rating r : values()) {
+            if (r.ratingId == ratingId) {
                 return r;
             }
         }
@@ -24,6 +39,6 @@ public enum Rating {
 
     @Override
     public String toString() {
-        return this.rating;
+        return this.ratingName;
     }
 }
