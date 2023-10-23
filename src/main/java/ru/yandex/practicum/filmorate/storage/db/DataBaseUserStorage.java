@@ -18,6 +18,8 @@ import java.util.Set;
 public class DataBaseUserStorage implements UserStorage {
     private JdbcTemplate userTemplate;
 
+    private static final String SQL_USER_BY_ID = "select u.* from users u where u.id = ?";
+
     public DataBaseUserStorage(JdbcTemplate jdbcTemplate) {
         this.userTemplate = jdbcTemplate;
     }
@@ -45,18 +47,25 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public User getUserById(Long userId) {
-        String sql = "select from * from users where id = ?";
-        return userTemplate.queryForObject(sql, (rs, rowNum) -> mapUser(rs), userId);
+        return userTemplate.queryForObject(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
     }
 
     @Override
     public boolean deleteUser(Long userId, User user) {
-        return false;
+        String sql = "delete from users where id = ? and email = ? " +
+                "and login = ? and name = ? and birthday = ?";
+        return userTemplate.update(sql,
+                userId,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday()) > 0;
     }
 
     @Override
     public int deleteUser(Long userId) {
-        return 0;
+        String sql = "delete from users where id = ?";
+        return userTemplate.update(sql, userId);
     }
 
     @Override
@@ -77,6 +86,11 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public Long addUser(Long userId, User user) {
+        Long userIdAdded;
+        String sqlWoId = "insert into users (email, login, birthday, name) \n" +
+                "values(?, ?, ?, ?)";
+        String sqlWithId = "insert int users (id, email, login, birthday, name) \n" +
+                "values(?, ?, ?, ?, ?)";
         return null;
     }
 }

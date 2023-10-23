@@ -21,7 +21,7 @@ public class DataBaseFilmStorage implements FilmStorage {
 
     private final JdbcTemplate filmTemplate;
 
-    private static final String SQL_FILM_BY_ID = "select f.*, r.rating  from films f left join ratings r on f.rating_id = r.id where f.id = ?";
+    private static final String SQL_FILM_BY_ID = "select f.*, r.rating from films f left join ratings r on f.rating_id = r.id where f.id = ?";
 
     public DataBaseFilmStorage(JdbcTemplate jdbcTemplate) {
         this.filmTemplate = jdbcTemplate;
