@@ -95,7 +95,7 @@ public class DataBaseFilmStorage implements FilmStorage {
     @Override
     public boolean checkFilmIsPresentInStorage(Long filmId) {
         List<Film> filmsById = filmTemplate.query(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
-        return filmsById.isEmpty();
+        return !filmsById.isEmpty();
     }
 
     @Override

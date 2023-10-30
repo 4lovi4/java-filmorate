@@ -67,12 +67,21 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public boolean checkUserIsPresent(Long userId, User user) {
-        return false;
+        String sqlByUserFields = "select * from users u " +
+                "where u.email = ? and u.login = ? and u.birthday = ? and u.name = name";
+        List<User> usersById = userTemplate.query(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
+        List<User> usersByFields = userTemplate.query(sqlByUserFields, (rs, rowNum) -> mapUser(rs),
+                user.getEmail(),
+                user.getLogin(),
+                user.getBirthday(),
+                user.getName());
+        return (!usersById.isEmpty() || !usersByFields.isEmpty());
     }
 
     @Override
     public boolean checkUserIsPresent(Long userId) {
-        return false;
+        List<User> users = userTemplate.query(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
+        return !users.isEmpty();
     }
 
     @Override
