@@ -7,27 +7,29 @@ import ru.yandex.practicum.filmorate.model.Rating;
 import java.util.List;
 
 public interface FilmStorage {
-    List<Film> getAllFilms();
+    List<Film> getAllFilmsFromStorage();
 
-    Film getFilmById(Long filmId);
+    Film getFilmByIdFromStorage(Long filmId);
 
-    boolean checkFilmIsPresent(Long filmId, Film film);
+    boolean checkFilmIsPresentInStorage(Long filmId, Film film);
 
-    Long addFilm(Long filmId, Film film);
+    Long addFilmToStorage(Long filmId, Film film);
 
-    boolean checkFilmIsPresent(Long filmId);
+    boolean checkFilmIsPresentInStorage(Long filmId);
 
-    boolean deleteFilm(Long filmId, Film film);
+    boolean deleteFilmFromStorage(Long filmId, Film film);
 
-    int deleteFilm(Long filmId);
+    int deleteFilmFromStorage(Long filmId);
 
-    Genre getGenreById(int genreId);
+    public void addLikeToFilmInStorage(Long filmId, Long userId);
 
-     List<Genre> getAllGenres();
+    Genre getGenreByIdFromStorage(int genreId);
 
-    Rating getMpaById(int mpaId);
+    List<Genre> getAllGenresFromStorage();
+
+    Rating getMpaByIdFromStorage(int mpaId);
 
     List<Rating> getAllMpa();
 
-    Long getLastFilmId();
+    Long getLastFilmIdFromStorage();
 }

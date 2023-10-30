@@ -24,15 +24,15 @@ public class FilmService {
     @Autowired
     public FilmService(@Qualifier("dataBaseFilmStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
-        this.filmCounter = this.filmStorage.getLastFilmId();
+        this.filmCounter = this.filmStorage.getLastFilmIdFromStorage();
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmStorage.getAllFilmsFromStorage();
     }
 
     public Film getFilmById(Long filmId) {
-        Film film = filmStorage.getFilmById(filmId);
+        Film film = filmStorage.getFilmByIdFromStorage(filmId);
         if (Objects.isNull(film)) {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
@@ -41,11 +41,11 @@ public class FilmService {
 
     public Film addNewFilm(Film film) {
         log.info("Запрос на добавление фильма: " + film);
-        if (!filmStorage.checkFilmIsPresent(film.getId(), film)) {
+        if (!filmStorage.checkFilmIsPresentInStorage(film.getId(), film)) {
             if (Objects.isNull(film.getId())) {
                 film.setId(getNewFilmId());
             }
-            filmStorage.addFilm(film.getId(), film);
+            filmStorage.addFilmToStorage(film.getId(), film);
         } else {
             log.error("Фильм уже добавлен в сервис");
             throw new InstanceAlreadyExistsException("Фильм уже добавлен");
@@ -56,8 +56,8 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.info("Запрос на изменение фильма: " + film);
-        if (filmStorage.checkFilmIsPresent(film.getId())) {
-            filmStorage.addFilm(film.getId(), film);
+        if (filmStorage.checkFilmIsPresentInStorage(film.getId())) {
+            filmStorage.addFilmToStorage(film.getId(), film);
         } else {
             log.error("Неизвестный фильм передан для редактирования");
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, film.getId()));
@@ -67,26 +67,26 @@ public class FilmService {
     }
 
     public Film addLikeToFilm(Long filmId, Long userId) {
-        if (!filmStorage.checkFilmIsPresent(filmId)) {
+        if (!filmStorage.checkFilmIsPresentInStorage(filmId)) {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
-        Film film = filmStorage.getFilmById(filmId);
-        film.getLikes().add(userId);
+        filmStorage.addLikeToFilmInStorage(filmId, userId);
+        Film film = filmStorage.getFilmByIdFromStorage(filmId);
         return film;
     }
 
     public Film removeLikeFromFilm(Long filmId, Long userId) {
-        if (!filmStorage.checkFilmIsPresent(filmId)) {
+        if (!filmStorage.checkFilmIsPresentInStorage(filmId)) {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
-        Film film = filmStorage.getFilmById(filmId);
+        Film film = filmStorage.getFilmByIdFromStorage(filmId);
         film.getLikes().remove(userId);
         return film;
     }
 
     public List<Film> getPopularFilmsByLikes(Long count) {
         count = Objects.isNull(count) ? 10L : count;
-        return filmStorage.getAllFilms()
+        return filmStorage.getAllFilmsFromStorage()
                 .stream()
                 .sorted((f1, f2) ->
                         Integer.compare(
@@ -98,7 +98,7 @@ public class FilmService {
     }
 
     public Rating getMpaById(int mpaId) {
-        return null;
+        return Rating.valueOfId(mpaId);
     }
 
     private Long getNewFilmId() {

@@ -17,54 +17,59 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getAllFilms() {
+    public List<Film> getAllFilmsFromStorage() {
         return new ArrayList<>(filmsInMemory.values());
     }
 
     @Override
-    public Film getFilmById(Long filmId) {
+    public Film getFilmByIdFromStorage(Long filmId) {
         return filmsInMemory.get(filmId);
     }
 
     @Override
-    public Long addFilm(Long filmId, Film film) {
+    public Long addFilmToStorage(Long filmId, Film film) {
         filmsInMemory.put(filmId, film);
         return filmId;
     }
 
     @Override
-    public boolean checkFilmIsPresent(Long filmId, Film film) {
+    public boolean checkFilmIsPresentInStorage(Long filmId, Film film) {
         return filmsInMemory.containsKey(filmId) ||
                 filmsInMemory.containsValue(film);
     }
 
     @Override
-    public boolean checkFilmIsPresent(Long filmId) {
+    public boolean checkFilmIsPresentInStorage(Long filmId) {
         return filmsInMemory.containsKey(filmId);
     }
 
     @Override
-    public boolean deleteFilm(Long filmId, Film film) {
+    public boolean deleteFilmFromStorage(Long filmId, Film film) {
         return filmsInMemory.remove(filmId, film);
     }
 
     @Override
-    public int deleteFilm(Long filmId) {
+    public int deleteFilmFromStorage(Long filmId) {
         return Objects.isNull(filmsInMemory.remove(filmId)) ? 0 : 1 ;
     }
 
     @Override
-    public Genre getGenreById(int genreId) {
+    public void addLikeToFilmInStorage(Long filmId, Long userId) {
+        filmsInMemory.get(filmId).getLikes().add(userId);
+    }
+
+    @Override
+    public Genre getGenreByIdFromStorage(int genreId) {
         return Genre.valueOfId(genreId);
     }
 
     @Override
-    public List<Genre> getAllGenres() {
+    public List<Genre> getAllGenresFromStorage() {
         return List.of(Genre.values());
     }
 
     @Override
-    public Rating getMpaById(int mpaId) {
+    public Rating getMpaByIdFromStorage(int mpaId) {
         return Rating.valueOfId(mpaId);
     }
 
@@ -73,7 +78,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return List.of(Rating.values());
     }
 
-    public Long getLastFilmId() {
+    public Long getLastFilmIdFromStorage() {
         return filmsInMemory.isEmpty() ? 0L :
                 filmsInMemory
                         .keySet()

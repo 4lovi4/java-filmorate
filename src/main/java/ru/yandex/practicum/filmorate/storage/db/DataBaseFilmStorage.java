@@ -61,7 +61,7 @@ public class DataBaseFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getAllFilms() {
+    public List<Film> getAllFilmsFromStorage() {
         String sql = "select f.*, r.rating left from films f join ratings r on f.rating_id = r.id";
         List<Film> films = filmTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
         for (Film f : films) {
@@ -72,7 +72,7 @@ public class DataBaseFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(Long filmId) {
+    public Film getFilmByIdFromStorage(Long filmId) {
         Film film = filmTemplate.queryForObject(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
         Objects.requireNonNull(film).setGenres(getGenresByFilmId(film.getId()));
         Objects.requireNonNull(film).setLikes(getLikesByFilmId(film.getId()));
@@ -80,7 +80,7 @@ public class DataBaseFilmStorage implements FilmStorage {
     }
 
     @Override
-    public boolean checkFilmIsPresent(Long filmId, Film film) {
+    public boolean checkFilmIsPresentInStorage(Long filmId, Film film) {
         String sqlByFields = "select * from films f where f.name = ? and f.description = ? and f.release_date = ? and f.duration = ?";
         List<Film> filmsById = filmTemplate.query(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
         List<Film> filmsByFields = filmTemplate.query(sqlByFields,
@@ -93,13 +93,13 @@ public class DataBaseFilmStorage implements FilmStorage {
     }
 
     @Override
-    public boolean checkFilmIsPresent(Long filmId) {
+    public boolean checkFilmIsPresentInStorage(Long filmId) {
         List<Film> filmsById = filmTemplate.query(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
         return filmsById.isEmpty();
     }
 
     @Override
-    public Long addFilm(Long filmId, Film film) {
+    public Long addFilmToStorage(Long filmId, Film film) {
         Long filmIdAdded;
         String sqlWoId = "insert into films (name, description, release_date, duration, rating_id)\n" +
                 "values(?, ?, ?, ?,\n" +
@@ -110,7 +110,7 @@ public class DataBaseFilmStorage implements FilmStorage {
         if (Objects.isNull(filmId)) {
             filmTemplate.update(sqlWoId, film.getName(), film.getDescription(),
                     film.getReleaseDate(), film.getDuration(), film.getMpa().ratingName);
-            filmIdAdded = getLastFilmId();
+            filmIdAdded = getLastFilmIdFromStorage();
         }
         else {
             filmTemplate.update(sqlWithId, filmId, film.getName(), film.getDescription(), film.getReleaseDate(),
@@ -121,38 +121,44 @@ public class DataBaseFilmStorage implements FilmStorage {
     }
 
     @Override
-    public boolean deleteFilm(Long filmId, Film film) {
+    public boolean deleteFilmFromStorage(Long filmId, Film film) {
         String sql = "delete from films where id = ? and name = ? and description = ?\n" +
                 "and release_date = ? and duration = ?";
         return filmTemplate.update(sql, filmId, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration()) > 0;
     }
 
-    public int deleteFilm(Long filmId) {
+    public int deleteFilmFromStorage(Long filmId) {
         String sql = "delete from films where id = ?";
         return filmTemplate.update(sql, filmId);
     }
 
     @Override
-    public Long getLastFilmId() {
+    public Long getLastFilmIdFromStorage() {
         String sql = "select id from films order by id desc limit 1";
         return filmTemplate.queryForObject(sql, Long.class);
     }
 
     @Override
-    public Genre getGenreById(int genreId) {
+    public void addLikeToFilmInStorage(Long filmId, Long userId) {
+        String sql = "insert into likes (film_id, user_id) values (?, ?)";
+        filmTemplate.update(sql, filmId, userId);
+    }
+
+    @Override
+    public Genre getGenreByIdFromStorage(int genreId) {
         String sql = "select genre from genres g where g.id = ?";
         return filmTemplate.queryForObject(sql, (rs, rowNum) -> mapGenre(rs), genreId);
     }
 
     @Override
-    public List<Genre> getAllGenres() {
+    public List<Genre> getAllGenresFromStorage() {
         String sql = "select genre from genres g";
         return filmTemplate.query(sql, (rs, rowNum) -> mapGenre(rs));
     }
 
     @Override
-    public Rating getMpaById(int mpaId) {
+    public Rating getMpaByIdFromStorage(int mpaId) {
         String sql = "select rating from ratings r where r.id = ?";
         return filmTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), mpaId);
     }

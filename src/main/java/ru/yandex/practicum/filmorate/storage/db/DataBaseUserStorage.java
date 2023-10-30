@@ -9,10 +9,7 @@ import javax.sql.RowSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component("dataBaseUserStorage")
 public class DataBaseUserStorage implements UserStorage {
@@ -36,7 +33,7 @@ public class DataBaseUserStorage implements UserStorage {
 
     private Set<Long> getFriendsByUserId(Long userId) {
         String sql = "select user_id from friends f where f.user_id = ? and approved = true";
-        return new HashSet<>(userTemplate.queryForList(sql, Long.class));
+        return new HashSet<>(userTemplate.queryForList(sql, Long.class, userId));
     }
 
     @Override
@@ -91,6 +88,14 @@ public class DataBaseUserStorage implements UserStorage {
                 "values(?, ?, ?, ?)";
         String sqlWithId = "insert int users (id, email, login, birthday, name) \n" +
                 "values(?, ?, ?, ?, ?)";
-        return null;
+        if (Objects.isNull(userId)) {
+            userTemplate.update(sqlWoId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
+            userIdAdded = getLastUserId();
+        }
+        else {
+            userTemplate.update(sqlWithId, userId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getBirthday(), user.getName());
+            userIdAdded = userId;
+        }
+        return userIdAdded;
     }
 }
