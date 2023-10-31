@@ -42,10 +42,8 @@ public class FilmService {
     public Film addNewFilm(Film film) {
         log.info("Запрос на добавление фильма: " + film);
         if (!filmStorage.checkFilmIsPresentInStorage(film.getId(), film)) {
-            if (Objects.isNull(film.getId())) {
-                film.setId(getNewFilmId());
-            }
-            filmStorage.addFilmToStorage(film.getId(), film);
+            Long filmIdAdded = filmStorage.addFilmToStorage(null, film);
+            film.setId(filmIdAdded);
         } else {
             log.error("Фильм уже добавлен в сервис");
             throw new InstanceAlreadyExistsException("Фильм уже добавлен");
