@@ -74,22 +74,21 @@ public class FilmController {
 
     @GetMapping("/mpa")
     public List<Rating> findAllMpa() {
-        return null;
+        return filmService.getAllMpa();
     }
 
     @GetMapping("/mpa/{id}")
     public Rating findMpaById(@PathVariable("id") Integer mpaId) {
-        return null;
+        return filmService.getMpaById(mpaId);
     }
 
     @GetMapping("/genres")
     public List<Genre> findAllGenres() {
-        return null;
+        return filmService.getAllGenres();
     }
 
-    @GetMapping("/genres/id")
+    @GetMapping("/genres/{id}")
     public Genre findGenreById(@PathVariable("id") Integer genreId) {
-        return null;
+        return filmService.getGenreById(genreId);
     }
-
 }
