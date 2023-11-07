@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import javax.sql.RowSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -37,18 +36,34 @@ public class DataBaseUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        String sql = "select from * from users";
+    public List<User> getAllUsersFromStorage() {
+        String sql = "select * from users";
         return userTemplate.query(sql, (rs, rowNum) -> mapUser(rs));
     }
 
     @Override
-    public User getUserById(Long userId) {
+    public User getUserByIdFromStorage(Long userId) {
         return userTemplate.queryForObject(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
     }
 
     @Override
-    public boolean deleteUser(Long userId, User user) {
+    public int updateUserInStorage(User user) {
+        String sql = "update users set " +
+                "email = ?, " +
+                "login = ?, " +
+                "birthday = ?, " +
+                "name = ? " +
+                "where id = ?";
+        return userTemplate.update(sql,
+                user.getEmail(),
+                user.getLogin(),
+                user.getBirthday(),
+                user.getName(),
+                user.getId());
+    }
+
+    @Override
+    public boolean deleteUserFromStorage(Long userId, User user) {
         String sql = "delete from users where id = ? and email = ? " +
                 "and login = ? and name = ? and birthday = ?";
         return userTemplate.update(sql,
@@ -60,13 +75,13 @@ public class DataBaseUserStorage implements UserStorage {
     }
 
     @Override
-    public int deleteUser(Long userId) {
+    public int deleteUserFromStorage(Long userId) {
         String sql = "delete from users where id = ?";
         return userTemplate.update(sql, userId);
     }
 
     @Override
-    public boolean checkUserIsPresent(Long userId, User user) {
+    public boolean checkUserIsPresentInStorage(Long userId, User user) {
         String sqlByUserFields = "select * from users u " +
                 "where u.email = ? and u.login = ? and u.birthday = ? and u.name = name";
         List<User> usersById = userTemplate.query(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
@@ -79,19 +94,19 @@ public class DataBaseUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean checkUserIsPresent(Long userId) {
+    public boolean checkUserIsPresentInStorage(Long userId) {
         List<User> users = userTemplate.query(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
         return !users.isEmpty();
     }
 
     @Override
-    public Long getLastUserId() {
+    public Long getLastUserIdFromStorage() {
         String sql = "select id from users order by id desc limit 1";
         return userTemplate.queryForObject(sql, Long.class);
     }
 
     @Override
-    public Long addUser(Long userId, User user) {
+    public Long addUserToStorage(Long userId, User user) {
         Long userIdAdded;
         String sqlWoId = "insert into users (email, login, birthday, name) \n" +
                 "values(?, ?, ?, ?)";
@@ -99,7 +114,7 @@ public class DataBaseUserStorage implements UserStorage {
                 "values(?, ?, ?, ?, ?)";
         if (Objects.isNull(userId)) {
             userTemplate.update(sqlWoId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
-            userIdAdded = getLastUserId();
+            userIdAdded = getLastUserIdFromStorage();
         }
         else {
             userTemplate.update(sqlWithId, userId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getBirthday(), user.getName());

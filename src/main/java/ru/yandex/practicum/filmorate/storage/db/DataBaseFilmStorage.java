@@ -62,7 +62,7 @@ public class DataBaseFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilmsFromStorage() {
-        String sql = "select f.*, r.rating left from films f join ratings r on f.rating_id = r.id";
+        String sql = "select f.*, r.rating from films f left join ratings r on f.rating_id = r.id;";
         List<Film> films = filmTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
         for (Film f : films) {
             f.setGenres(getGenresByFilmId(f.getId()));
@@ -118,6 +118,18 @@ public class DataBaseFilmStorage implements FilmStorage {
             filmIdAdded = filmId;
         }
         return filmIdAdded;
+    }
+
+    @Override
+    public int updateFilmInStorage(Film film) {
+        String sql = "update films set name = , " +
+                "description = ?, " +
+                "release_date = ?, " +
+                "duration = ?, " +
+                "rating_id = ? " +
+                "where id = ?";
+        return filmTemplate.update(sql, film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration(), film.getMpa().ratingId, film.getId());
     }
 
     @Override

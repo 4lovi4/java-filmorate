@@ -33,6 +33,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public int updateFilmInStorage(Film film) {
+        deleteFilmFromStorage(film.getId());
+        return addFilmToStorage(film.getId(), film).intValue();
+    }
+
+    @Override
     public boolean checkFilmIsPresentInStorage(Long filmId, Film film) {
         return filmsInMemory.containsKey(filmId) ||
                 filmsInMemory.containsValue(film);

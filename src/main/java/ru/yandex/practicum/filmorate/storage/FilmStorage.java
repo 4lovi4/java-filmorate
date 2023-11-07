@@ -15,6 +15,8 @@ public interface FilmStorage {
 
     Long addFilmToStorage(Long filmId, Film film);
 
+    int updateFilmInStorage(Film film);
+
     boolean checkFilmIsPresentInStorage(Long filmId);
 
     boolean deleteFilmFromStorage(Long filmId, Film film);
