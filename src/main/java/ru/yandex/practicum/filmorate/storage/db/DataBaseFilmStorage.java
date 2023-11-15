@@ -181,7 +181,14 @@ public class DataBaseFilmStorage implements FilmStorage {
     @Override
     public Genre getGenreByIdFromStorage(int genreId) {
         String sql = "select genre from genres g where g.id = ?";
-        return filmTemplate.queryForObject(sql, (rs, rowNum) -> mapGenre(rs), genreId);
+        Genre genre;
+        try {
+            genre = filmTemplate.queryForObject(sql, (rs, rowNum) -> mapGenre(rs), genreId);
+        }
+        catch (EmptyResultDataAccessException e) {
+            genre = null;
+        }
+        return genre;
     }
 
     @Override
@@ -193,7 +200,14 @@ public class DataBaseFilmStorage implements FilmStorage {
     @Override
     public Rating getMpaByIdFromStorage(int mpaId) {
         String sql = "select rating from ratings r where r.id = ?";
-        return filmTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), mpaId);
+        Rating mpa;
+        try {
+            mpa = filmTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), mpaId);
+        }
+         catch (EmptyResultDataAccessException e) {
+            mpa = null;
+         }
+        return mpa;
     }
 
     @Override

@@ -97,7 +97,11 @@ public class FilmService {
     }
 
     public Rating getMpaById(int mpaId) {
-        return filmStorage.getMpaByIdFromStorage(mpaId);
+        Rating mpa = filmStorage.getMpaByIdFromStorage(mpaId);
+        if (Objects.isNull(mpa)) {
+            throw new NotFoundException(String.format("mpa id = %d не найден", mpaId));
+        }
+        return mpa;
     }
 
     public List<Rating> getAllMpa() {
@@ -105,7 +109,11 @@ public class FilmService {
     }
 
     public Genre getGenreById(int genreId) {
-        return filmStorage.getGenreByIdFromStorage(genreId);
+        Genre genre = filmStorage.getGenreByIdFromStorage(genreId);
+        if (Objects.isNull(genre)) {
+            throw new NotFoundException(String.format("Жанр id = %d не найден", genreId));
+        }
+        return genre;
     }
 
     public List<Genre> getAllGenres() {
