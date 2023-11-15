@@ -10,6 +10,10 @@ import java.io.IOException;
 
 public class GenreEnumDeserializer extends StdDeserializer<Genre> {
 
+    public GenreEnumDeserializer() {
+        this(null);
+    }
+
     public GenreEnumDeserializer(Class<?> c) {
         super(c);
     }

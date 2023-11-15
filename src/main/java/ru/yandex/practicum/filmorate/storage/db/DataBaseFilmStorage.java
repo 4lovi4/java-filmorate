@@ -31,7 +31,13 @@ public class DataBaseFilmStorage implements FilmStorage {
         String description = rs.getString("description");
         LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
         int duration = rs.getInt("duration");
-        Rating rating = rs.getObject("rating", Rating.class);
+        Rating rating;
+        try {
+            rating = Rating.valueOfName(rs.getString("rating"));
+        }
+        catch (SQLException e) {
+            rating = null;
+        }
         return new Film(id, name, description, releaseDate, duration, rating);
     }
 
@@ -131,7 +137,7 @@ public class DataBaseFilmStorage implements FilmStorage {
 
     @Override
     public int updateFilmInStorage(Film film) {
-        String sql = "update films set name = , " +
+        String sql = "update films set name = ?, " +
                 "description = ?, " +
                 "release_date = ?, " +
                 "duration = ?, " +

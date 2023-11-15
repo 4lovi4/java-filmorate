@@ -10,6 +10,10 @@ import java.io.IOException;
 
 public class RatingEnumDeserializer extends StdDeserializer<Rating> {
 
+    public RatingEnumDeserializer() {
+        this(null);
+    }
+
     public RatingEnumDeserializer(Class<?> c) {
         super(c);
     }

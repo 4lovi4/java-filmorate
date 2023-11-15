@@ -17,7 +17,6 @@ public enum Rating {
     @JsonProperty("id")
     public final int ratingId;
     @JsonProperty("name")
-    @JsonIgnore
     public final String ratingName;
 
     Rating(int id) {
