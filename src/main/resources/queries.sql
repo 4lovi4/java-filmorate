@@ -15,10 +15,7 @@ VALUES (1, 'Комедия'),
 (3, 'Мультфильм'),
 (4, 'Триллер'),
 (5, 'Документальный'),
-(6, 'Боевик'),
-(7, 'Военный'),
-(8, 'Детектив'),
-(9, 'Фантастика');
+(6, 'Боевик');
 
 INSERT INTO RATINGS (id, rating)
 VALUES (1, 'G'),
@@ -47,10 +44,8 @@ VALUES('Луна', '2029 год. Южная Корея отправляет на
 
 INSERT INTO films_genres VALUES
 ((SELECT ID FROM FILMS WHERE NAME = 'В августе 44'), 6),
-((SELECT ID FROM FILMS WHERE NAME = 'В августе 44'), 2),
-((SELECT ID FROM FILMS WHERE NAME = 'В августе 44'), 7),
-((SELECT ID FROM FILMS WHERE NAME = 'В августе 44'), 8);
+((SELECT ID FROM FILMS WHERE NAME = 'В августе 44'), 2);
 
 INSERT INTO films_genres VALUES
 ((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 2),
-((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 9);
+((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 4);

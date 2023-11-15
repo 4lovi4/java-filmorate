@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(using = GenreEnumDeserializer.class)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Genre {
     COMEDY(1, "Комедия"),
@@ -10,10 +13,7 @@ public enum Genre {
     CARTOON(3,"Мультфильм"),
     THRILLER(4,"Триллер"),
     DOC(5,"Документальный"),
-    ACTION(6,"Боевик"),
-    MILITARY(7,"Военный"),
-    DETECTIVE(8,"Детектив"),
-    FICTION(9,"Фантастика");
+    ACTION(6,"Боевик");
 
     @JsonProperty("id")
     public final int genreId;

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.db;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -11,10 +12,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Component("dataBaseFilmStorage")
 public class DataBaseFilmStorage implements FilmStorage {
@@ -33,7 +31,7 @@ public class DataBaseFilmStorage implements FilmStorage {
         String description = rs.getString("description");
         LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
         int duration = rs.getInt("duration");
-        String rating = rs.getObject("rating", String.class);
+        Rating rating = rs.getObject("rating", Rating.class);
         return new Film(id, name, description, releaseDate, duration, rating);
     }
 
@@ -43,12 +41,12 @@ public class DataBaseFilmStorage implements FilmStorage {
                 .query(sql, (rs, rowNumber) -> rs.getLong("user_id"), filmId));
     }
 
-    private Genre mapGenre(ResultSet rs) throws SQLException{
+    private Genre mapGenre(ResultSet rs) throws SQLException {
         String genreName = rs.getString("genre");
         return Genre.valueOfName(genreName);
     }
 
-    private Rating mapRating(ResultSet rs) throws SQLException{
+    private Rating mapRating(ResultSet rs) throws SQLException {
         String ratingName = rs.getString("rating");
         return Rating.valueOfName(ratingName);
     }
@@ -63,20 +61,32 @@ public class DataBaseFilmStorage implements FilmStorage {
     @Override
     public List<Film> getAllFilmsFromStorage() {
         String sql = "select f.*, r.rating from films f left join ratings r on f.rating_id = r.id;";
-        List<Film> films = filmTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
-        for (Film f : films) {
-            f.setGenres(getGenresByFilmId(f.getId()));
-            f.setLikes(getLikesByFilmId(f.getId()));
+        List<Film> films;
+        try {
+            films = filmTemplate.query(sql, (rs, rowNum) -> mapFilm(rs));
+            for (Film f : films) {
+                f.setGenres(getGenresByFilmId(f.getId()));
+                f.setLikes(getLikesByFilmId(f.getId()));
+            }
+        } catch (EmptyResultDataAccessException e) {
+            films = new ArrayList<>();
         }
         return films;
     }
 
     @Override
     public Film getFilmByIdFromStorage(Long filmId) {
-        Film film = filmTemplate.queryForObject(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
-        Objects.requireNonNull(film).setGenres(getGenresByFilmId(film.getId()));
-        Objects.requireNonNull(film).setLikes(getLikesByFilmId(film.getId()));
-        return null;
+        Film film;
+        try {
+            film = filmTemplate.queryForObject(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
+            Objects.requireNonNull(film).setGenres(getGenresByFilmId(film.getId()));
+            Objects.requireNonNull(film).setLikes(getLikesByFilmId(film.getId()));
+        }
+        catch (EmptyResultDataAccessException e) {
+            film = null;
+        }
+
+        return film;
     }
 
     @Override
@@ -103,16 +113,15 @@ public class DataBaseFilmStorage implements FilmStorage {
         Long filmIdAdded;
         String sqlWoId = "insert into films (name, description, release_date, duration, rating_id)\n" +
                 "values(?, ?, ?, ?,\n" +
-                "(select id from ratings where rating = ?)";
+                "(select id from ratings where rating = ?))";
         String sqlWithId = "insert into films (id, name, description, release_date, duration, rating_id)\n" +
                 "values(?, ?, ?, ?, ?,\n" +
-                "(select id from ratings where rating = ?)";
+                "(select id from ratings where rating = ?))";
         if (Objects.isNull(filmId)) {
             filmTemplate.update(sqlWoId, film.getName(), film.getDescription(),
                     film.getReleaseDate(), film.getDuration(), film.getMpa().ratingName);
             filmIdAdded = getLastFilmIdFromStorage();
-        }
-        else {
+        } else {
             filmTemplate.update(sqlWithId, filmId, film.getName(), film.getDescription(), film.getReleaseDate(),
                     film.getDuration(), film.getMpa().ratingName);
             filmIdAdded = filmId;
@@ -148,7 +157,13 @@ public class DataBaseFilmStorage implements FilmStorage {
     @Override
     public Long getLastFilmIdFromStorage() {
         String sql = "select id from films order by id desc limit 1";
-        return filmTemplate.queryForObject(sql, Long.class);
+        Long lastFilmId;
+        try {
+            lastFilmId = filmTemplate.queryForObject(sql, Long.class);
+        } catch (EmptyResultDataAccessException e) {
+            lastFilmId = 0L;
+        }
+        return lastFilmId;
     }
 
     @Override

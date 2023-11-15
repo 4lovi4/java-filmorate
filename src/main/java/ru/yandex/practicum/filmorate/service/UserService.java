@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -19,7 +18,6 @@ public class UserService {
     private Long userCounter;
 
     public static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
-    public static final String ALL_USERS_IS_EMPTY_MESSAGE = "Не найдено ни одного пользователя";
 
     @Autowired
     public UserService(@Qualifier("dataBaseUserStorage") UserStorage userStorage) {
@@ -34,13 +32,7 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        try {
-            List<User> allUsers = userStorage.getAllUsersFromStorage();
-        }
-        catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException(String.format(ALL_USERS_IS_EMPTY_MESSAGE));
-        }
-        return getAllUsers();
+        return userStorage.getAllUsersFromStorage();
     }
 
     public User getUserById(Long userId) {
@@ -71,7 +63,7 @@ public class UserService {
         log.info("Запрос на изменение пользователя: " + user);
         checkUserName(user);
         if (userStorage.checkUserIsPresentInStorage(user.getId())) {
-            userStorage.addUserToStorage(user.getId(), user);
+            userStorage.updateUserInStorage(user);
         } else {
             log.error("Передан неизвестный пользователь для редактирования");
             throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, user.getId()));
@@ -92,7 +84,7 @@ public class UserService {
         User user = userStorage.getUserByIdFromStorage(userId);
         User friend = userStorage.getUserByIdFromStorage(friendId);
         user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+        userStorage.updateUserInStorage(user);
     }
 
     public void deleteUserFromFriends(Long userId, Long friendId) {

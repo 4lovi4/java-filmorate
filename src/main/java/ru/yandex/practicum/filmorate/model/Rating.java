@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(using = RatingEnumDeserializer.class)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Rating {
     G(1, "G"),
@@ -14,7 +17,13 @@ public enum Rating {
     @JsonProperty("id")
     public final int ratingId;
     @JsonProperty("name")
+    @JsonIgnore
     public final String ratingName;
+
+    Rating(int id) {
+        this.ratingId = id;
+        this.ratingName = valueOfId(id).ratingName;
+    }
 
     Rating(int ratingId, String ratingName) {
         this.ratingId = ratingId;
@@ -33,6 +42,15 @@ public enum Rating {
     public static Rating valueOfId(int ratingId) {
         for (Rating r : values()) {
             if (r.ratingId == ratingId) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public static Rating valueOfIdName(int ratingId, String ratingName) {
+        for (Rating r : values()) {
+            if (r.ratingId == ratingId && r.ratingName.equals(ratingName)) {
                 return r;
             }
         }

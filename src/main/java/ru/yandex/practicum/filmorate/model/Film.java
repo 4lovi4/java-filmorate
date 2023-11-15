@@ -58,13 +58,13 @@ public class Film {
         this.likes = new HashSet<>();
     }
 
-    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, String mpa) {
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, Rating mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.mpa = Rating.valueOfName(mpa);
+        this.mpa = mpa;
         this.likes = new HashSet<>();
     }
 }

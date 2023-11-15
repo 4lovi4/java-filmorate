@@ -56,7 +56,7 @@ public class FilmService {
     public Film updateFilm(Film film) {
         log.info("Запрос на изменение фильма: " + film);
         if (filmStorage.checkFilmIsPresentInStorage(film.getId())) {
-            filmStorage.addFilmToStorage(film.getId(), film);
+            filmStorage.updateFilmInStorage(film);
         } else {
             log.error("Неизвестный фильм передан для редактирования");
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, film.getId()));
