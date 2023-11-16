@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component("dataBaseFilmStorage")
 public class DataBaseFilmStorage implements FilmStorage {
@@ -58,8 +59,9 @@ public class DataBaseFilmStorage implements FilmStorage {
     }
 
     private Set<Genre> getGenresByFilmId(Long filmId) throws DataAccessException {
-        String sql = "select g.genre from genres g join films_genres fg " +
-                "on g.id = fg.genre_id where fg.film_id = ?";
+        String sql = "select g.genre from genres g " +
+                "join films_genres fg on g.id = fg.genre_id " +
+                "where fg.film_id = ?";
         return new HashSet<>(filmTemplate.query(sql,
                 (rs, rowNumber) -> Genre.valueOfName(rs.getString("genre")), filmId));
     }
@@ -143,6 +145,7 @@ public class DataBaseFilmStorage implements FilmStorage {
                 "duration = ?, " +
                 "rating_id = ? " +
                 "where id = ?";
+        setGenresForFilmInStorage(film.getId(), film.getGenres());
         return filmTemplate.update(sql, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getMpa().ratingId, film.getId());
     }
@@ -151,12 +154,14 @@ public class DataBaseFilmStorage implements FilmStorage {
     public boolean deleteFilmFromStorage(Long filmId, Film film) {
         String sql = "delete from films where id = ? and name = ? and description = ?\n" +
                 "and release_date = ? and duration = ?";
+        deleteFilmGenresFromStorage(filmId);
         return filmTemplate.update(sql, filmId, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration()) > 0;
     }
 
     public int deleteFilmFromStorage(Long filmId) {
         String sql = "delete from films where id = ?";
+        deleteFilmGenresFromStorage(filmId);
         return filmTemplate.update(sql, filmId);
     }
 
@@ -174,7 +179,13 @@ public class DataBaseFilmStorage implements FilmStorage {
 
     @Override
     public void addLikeToFilmInStorage(Long filmId, Long userId) {
-        String sql = "insert into likes (film_id, user_id) values (?, ?)";
+        String sql = "merge into likes (film_id, user_id) key (film_id, user_id) values (?, ?)";
+        filmTemplate.update(sql, filmId, userId);
+    }
+
+    @Override
+    public void removeLikeFromFilmInStorage(Long filmId, Long userId) {
+        String sql = "delete from likes where film_id = ? and user_id = ?";
         filmTemplate.update(sql, filmId, userId);
     }
 
@@ -195,6 +206,19 @@ public class DataBaseFilmStorage implements FilmStorage {
     public List<Genre> getAllGenresFromStorage() {
         String sql = "select genre from genres g";
         return filmTemplate.query(sql, (rs, rowNum) -> mapGenre(rs));
+    }
+
+    private int deleteFilmGenresFromStorage(Long filmId) {
+        String sql = "delete from films_genres where film_id = ?";
+        return filmTemplate.update(sql, filmId);
+    }
+
+    private void setGenresForFilmInStorage(Long filmId, Set<Genre> genres) {
+        String sql = "insert into films_genres (film_id, genre_id) values (?, ?)";
+        deleteFilmGenresFromStorage(filmId);
+        for (int g: genres.stream().map(genre -> genre.genreId).collect(Collectors.toSet())) {
+            filmTemplate.update(sql, filmId, g);
+        }
     }
 
     @Override

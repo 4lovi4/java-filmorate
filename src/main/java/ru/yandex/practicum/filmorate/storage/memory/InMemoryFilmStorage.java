@@ -65,6 +65,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public void removeLikeFromFilmInStorage(Long filmId, Long userId) {
+        Film film = filmsInMemory.get(filmId);
+        film.getLikes().remove(userId);
+        filmsInMemory.put(filmId, film);
+    }
+
+    @Override
     public Genre getGenreByIdFromStorage(int genreId) {
         return Genre.valueOfId(genreId);
     }

@@ -39,6 +39,7 @@ public class Film {
                 .parse("1895-12-28", DateTimeFormatter.ISO_LOCAL_DATE);
         this.duration = 1;
         this.likes = new HashSet<>();
+        this.genres = new HashSet<>();
     }
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
@@ -47,6 +48,7 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.likes = new HashSet<>();
+        this.genres = new HashSet<>();
     }
 
     public Film(Long id, String name, String description, LocalDate releaseDate, int duration) {
@@ -56,6 +58,7 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.likes = new HashSet<>();
+        this.genres = new HashSet<>();
     }
 
     public Film(Long id, String name, String description, LocalDate releaseDate, int duration, Rating mpa) {
@@ -66,5 +69,6 @@ public class Film {
         this.duration = duration;
         this.mpa = mpa;
         this.likes = new HashSet<>();
+        this.genres = new HashSet<>();
     }
 }

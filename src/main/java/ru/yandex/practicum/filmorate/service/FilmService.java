@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,9 +19,11 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
 
+
     private Long filmCounter;
 
     private static final String FILM_NOT_FOUND_MESSAGE = "Фильм id = %d не найден";
+    private static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
 
     @Autowired
     public FilmService(@Qualifier("dataBaseFilmStorage") FilmStorage filmStorage) {
@@ -78,8 +81,8 @@ public class FilmService {
         if (!filmStorage.checkFilmIsPresentInStorage(filmId)) {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
+        filmStorage.removeLikeFromFilmInStorage(filmId, userId);
         Film film = filmStorage.getFilmByIdFromStorage(filmId);
-        film.getLikes().remove(userId);
         return film;
     }
 

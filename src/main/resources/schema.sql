@@ -8,7 +8,6 @@ birthday DATE);
 CREATE TABLE IF NOT EXISTS friends (
 user_id INT REFERENCES users(id) ON DELETE CASCADE,
 friend_id INT REFERENCES users(id) ON DELETE CASCADE,
-approved BOOLEAN DEFAULT FALSE,
 CONSTRAINT friends_relation_uq UNIQUE(user_id, friend_id),
 CONSTRAINT user_friend_not_eq CHECK (user_id <> friend_id));
 

@@ -23,7 +23,9 @@ public interface FilmStorage {
 
     int deleteFilmFromStorage(Long filmId);
 
-    public void addLikeToFilmInStorage(Long filmId, Long userId);
+    void addLikeToFilmInStorage(Long filmId, Long userId);
+
+    void removeLikeFromFilmInStorage(Long filmId, Long userId);
 
     Genre getGenreByIdFromStorage(int genreId);
 
