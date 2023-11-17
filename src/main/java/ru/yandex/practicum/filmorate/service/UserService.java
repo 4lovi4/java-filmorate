@@ -99,7 +99,7 @@ public class UserService {
         User user = userStorage.getUserByIdFromStorage(userId);
         User friend = userStorage.getUserByIdFromStorage(friendId);
         user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        userStorage.updateUserInStorage(user);
     }
 
     public List<User> getAllUserFriends(Long userId) {

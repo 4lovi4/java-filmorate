@@ -12,12 +12,8 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
-import java.util.Objects;
 
 @Component("dataBaseFilmStorage")
 public class DataBaseFilmStorage implements FilmStorage {
@@ -66,8 +62,9 @@ public class DataBaseFilmStorage implements FilmStorage {
         String sql = "select g.genre from genres g " +
                 "join films_genres fg on g.id = fg.genre_id " +
                 "where fg.film_id = ?";
-        return new HashSet<>(filmTemplate.query(sql,
-                (rs, rowNumber) -> Genre.valueOfName(rs.getString("genre")), filmId));
+        return (filmTemplate.query(sql,
+                (rs, rowNumber) -> Genre.valueOfName(rs.getString("genre")), filmId))
+                .stream().sorted(Comparator.comparingInt(g -> g.genreId)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
@@ -138,6 +135,7 @@ public class DataBaseFilmStorage implements FilmStorage {
                     film.getDuration(), film.getMpa().ratingName);
             filmIdAdded = filmId;
         }
+        setGenresForFilmInStorage(filmIdAdded, film.getGenres());
         return filmIdAdded;
     }
 

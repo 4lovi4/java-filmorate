@@ -19,16 +19,11 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
 
-
-    private Long filmCounter;
-
     private static final String FILM_NOT_FOUND_MESSAGE = "Фильм id = %d не найден";
-    private static final String USER_NOT_FOUND_MESSAGE = "Пользователь id = %d не найден";
 
     @Autowired
     public FilmService(@Qualifier("dataBaseFilmStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
-        this.filmCounter = this.filmStorage.getLastFilmIdFromStorage();
     }
 
     public List<Film> getAllFilms() {
@@ -65,7 +60,7 @@ public class FilmService {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, film.getId()));
         }
         log.info("Изменён фильм: " + film);
-        return film;
+        return filmStorage.getFilmByIdFromStorage(film.getId());
     }
 
     public Film addLikeToFilm(Long filmId, Long userId) {
@@ -73,8 +68,7 @@ public class FilmService {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
         filmStorage.addLikeToFilmInStorage(filmId, userId);
-        Film film = filmStorage.getFilmByIdFromStorage(filmId);
-        return film;
+        return filmStorage.getFilmByIdFromStorage(filmId);
     }
 
     public Film removeLikeFromFilm(Long filmId, Long userId) {
@@ -82,8 +76,7 @@ public class FilmService {
             throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
         }
         filmStorage.removeLikeFromFilmInStorage(filmId, userId);
-        Film film = filmStorage.getFilmByIdFromStorage(filmId);
-        return film;
+        return filmStorage.getFilmByIdFromStorage(filmId);
     }
 
     public List<Film> getPopularFilmsByLikes(Long count) {
@@ -121,10 +114,5 @@ public class FilmService {
 
     public List<Genre> getAllGenres() {
         return filmStorage.getAllGenresFromStorage();
-    }
-
-    private Long getNewFilmId() {
-        this.filmCounter++;
-        return filmCounter;
     }
 }

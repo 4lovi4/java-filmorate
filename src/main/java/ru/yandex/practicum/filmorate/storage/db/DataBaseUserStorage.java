@@ -45,13 +45,6 @@ public class DataBaseUserStorage implements UserStorage {
         }
     }
 
-    private boolean checkMutualFriends(User user) {
-        String selectSql = "select f.friend_id from friends where f.user_id = ?";
-        List<Long> mutualFriends = userTemplate.queryForList(selectSql, Long.class, user.getId());
-
-        return false;
-    }
-
     @Override
     public List<User> getAllUsersFromStorage() {
         String sql = "select * from users";
@@ -61,6 +54,9 @@ public class DataBaseUserStorage implements UserStorage {
         }
         catch (EmptyResultDataAccessException e) {
             users = new ArrayList<>();
+        }
+        for (User user: users) {
+            user.setFriends(getFriendsByUserId(user.getId()));
         }
         return users;
     }
@@ -99,6 +95,8 @@ public class DataBaseUserStorage implements UserStorage {
     public boolean deleteUserFromStorage(Long userId, User user) {
         String sql = "delete from users where id = ? and email = ? " +
                 "and login = ? and name = ? and birthday = ?";
+        String sqlDeleteFriendUser = "delete from friends where friend_id = ?";
+        userTemplate.update(sqlDeleteFriendUser, userId);
         return userTemplate.update(sql,
                 userId,
                 user.getEmail(),
