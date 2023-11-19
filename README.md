@@ -1,7 +1,7 @@
 # java-filmorate
-Template repository for Filmorate project.
+ER диаграмма БД filmorate
 
-![ER Diagram filmorate DB](https://4.downloader.disk.yandex.ru/preview/33ce2f7826945936f11dbb9b429bb5d604c42999fa22b1b6ab112f4f86247947/inf/qdJo1q1Qxxr9t3vYxCqGWcYK_z0OpCJjjOVVrE_3si0aDRpvSj6GvBEYtTpB-HmfncJ-veJCShGtbXxYVXC5RA%3D%3D?uid=82823884&filename=erd1.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=82823884&tknv=v2&size=3456x1824)
+![ER Diagram filmorate DB](https://downloader.disk.yandex.ru/preview/ca8cb6af399e882b45d8e8be76e80d2a1d50f983ca31e1393b624a035775aabd/655ad5cf/9ElnoxqeIBUuEGA0FMzwPW8w8YCbJd8P2lsi0KJSq1WUtkspMG8g7sTmNRsfaJ6rzEQIsqxXXUIMjE9JhInJDA%3D%3D?uid=0&filename=filmorate_erd.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048)
 
 Примеры запросов на добавление/редактирование данных в БД
 
