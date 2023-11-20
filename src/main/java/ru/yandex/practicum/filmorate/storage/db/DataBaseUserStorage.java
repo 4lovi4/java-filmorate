@@ -51,8 +51,7 @@ public class DataBaseUserStorage implements UserStorage {
         List<User> users;
         try {
             users = userTemplate.query(sql, (rs, rowNum) -> mapUser(rs));
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             users = new ArrayList<>();
         }
         for (User user: users) {
@@ -67,8 +66,7 @@ public class DataBaseUserStorage implements UserStorage {
         try {
             user = userTemplate.queryForObject(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
             user.setFriends(getFriendsByUserId(userId));
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             user = null;
         }
         return user;
@@ -136,8 +134,7 @@ public class DataBaseUserStorage implements UserStorage {
         Long lastUserId;
         try {
             lastUserId = userTemplate.queryForObject(sql, Long.class);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             lastUserId = 0L;
         }
         return lastUserId;
@@ -153,8 +150,7 @@ public class DataBaseUserStorage implements UserStorage {
         if (Objects.isNull(userId)) {
             userTemplate.update(sqlWoId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
             userIdAdded = getLastUserIdFromStorage();
-        }
-        else {
+        } else {
             userTemplate.update(sqlWithId, userId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
             userIdAdded = userId;
         }

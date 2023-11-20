@@ -35,8 +35,7 @@ public class DataBaseFilmStorage implements FilmStorage {
         Rating rating;
         try {
             rating = Rating.valueOfName(rs.getString("rating"));
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             rating = null;
         }
         return new Film(id, name, description, releaseDate, duration, rating);
@@ -90,8 +89,7 @@ public class DataBaseFilmStorage implements FilmStorage {
             film = filmTemplate.queryForObject(SQL_FILM_BY_ID, (rs, rowNum) -> mapFilm(rs), filmId);
             Objects.requireNonNull(film).setGenres(getGenresByFilmId(film.getId()));
             Objects.requireNonNull(film).setLikes(getLikesByFilmId(film.getId()));
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             film = null;
         }
 
@@ -197,8 +195,7 @@ public class DataBaseFilmStorage implements FilmStorage {
         Genre genre;
         try {
             genre = filmTemplate.queryForObject(sql, (rs, rowNum) -> mapGenre(rs), genreId);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             genre = null;
         }
         return genre;
@@ -229,10 +226,9 @@ public class DataBaseFilmStorage implements FilmStorage {
         Rating mpa;
         try {
             mpa = filmTemplate.queryForObject(sql, (rs, rowNum) -> mapRating(rs), mpaId);
-        }
-         catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             mpa = null;
-         }
+        }
         return mpa;
     }
 
