@@ -56,7 +56,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public int deleteFilmFromStorage(Long filmId) {
-        return Objects.isNull(filmsInMemory.remove(filmId)) ? 0 : 1 ;
+        return Objects.isNull(filmsInMemory.remove(filmId)) ? 0 : 1;
     }
 
     @Override
