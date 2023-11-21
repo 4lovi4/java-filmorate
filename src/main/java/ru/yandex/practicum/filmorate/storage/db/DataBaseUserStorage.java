@@ -1,11 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.db;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.NotFoundException;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -17,16 +20,32 @@ import java.util.Set;
 
 @Component("dataBaseUserStorage")
 public class DataBaseUserStorage implements UserStorage {
-    private JdbcTemplate userTemplate;
+    private final JdbcTemplate userTemplate;
 
-    private static final String SQL_USER_BY_ID = "select u.* from users u where u.id = ?";
+    private static final String QUERY_USER_BY_ID = "select u.* from users u where u.id = ?";
+    private static final String QUERY_USER_BY_FIELDS = "select u.* from users u " +
+            "where u.email = ? and u.login = ? and u.birthday = ? and u.name = ?";
+    private static final String QUERY_ALL_USERS = "select * from users";
+    private static final String QUERY_LAST_USER_ID = "select id from users order by id desc limit 1";
+    private static final String QUERY_FRIEND_BY_USER_ID = "select f.friend_id from friends f where f.user_id = ?";
+    private static final String DELETE_USER_FROM_FRIENDS = "delete from friends f where f.user_id = ?";
+    private static final String INSERT_USER_FRIEND_RELATION = "insert into friends (user_id, friend_id) values (?, ?)";
+    private static final String INSERT_USER_WITHOUT_ID = "insert into users (email, login, birthday, name) \n" +
+            "values(?, ?, ?, ?)";
+    private static final String INSERT_USER_WITH_ID = "insert into users (id, email, login, birthday, name) \n" +
+            "values(?, ?, ?, ?, ?)";
+    private static final String UPDATE_USER = "update users set email = ?, login = ?, birthday = ?, name = ? where id = ?";
+    private static final String DELETE_USER_BY_FIELDS = "delete from users where id = ? and email = ? " +
+            "and login = ? and name = ? and birthday = ?";
+    private static final String DELETE_USER_BY_ID = "delete from users where id = ?";
+    private static final String DELETE_FRIEND_RELATION = "delete from friends where friend_id = ?";
 
     public DataBaseUserStorage(JdbcTemplate jdbcTemplate) {
         this.userTemplate = jdbcTemplate;
     }
 
     private User mapUser(ResultSet rs) throws SQLException {
-        Long id = rs.getLong("id");
+        long id = rs.getLong("id");
         String email = rs.getString("email");
         String login = rs.getString("login");
         String name = rs.getString("name");
@@ -36,29 +55,36 @@ public class DataBaseUserStorage implements UserStorage {
     }
 
     private Set<Long> getFriendsByUserId(Long userId) {
-        String sql = "select f.friend_id from friends f where f.user_id = ?";
-        return new HashSet<>(userTemplate.queryForList(sql, Long.class, userId));
+        return new HashSet<>(userTemplate.queryForList(QUERY_FRIEND_BY_USER_ID, Long.class, userId));
     }
 
     private void insertUserFriends(User user) {
-        String sqlDelete = "delete from friends f where f.user_id = ?";
-        String sqlInsert = "insert into friends (user_id, friend_id) values (?, ?)";
-        userTemplate.update(sqlDelete, user.getId());
-        for (Long friendId: user.getFriends()) {
-            userTemplate.update(sqlInsert, user.getId(), friendId);
-        }
+        userTemplate.update(DELETE_USER_FROM_FRIENDS, user.getId());
+        userTemplate.batchUpdate(INSERT_USER_FRIEND_RELATION, new BatchPreparedStatementSetter() {
+            final ArrayList<Long> userFriends = new ArrayList<>(user.getFriends());
+
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, user.getId());
+                ps.setLong(2, userFriends.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return userFriends.size();
+            }
+        });
     }
 
     @Override
     public List<User> getAllUsersFromStorage() {
-        String sql = "select * from users";
         List<User> users;
         try {
-            users = userTemplate.query(sql, (rs, rowNum) -> mapUser(rs));
+            users = userTemplate.query(QUERY_ALL_USERS, (rs, rowNum) -> mapUser(rs));
         } catch (EmptyResultDataAccessException e) {
             users = new ArrayList<>();
         }
-        for (User user: users) {
+        for (User user : users) {
             user.setFriends(getFriendsByUserId(user.getId()));
         }
         return users;
@@ -68,24 +94,20 @@ public class DataBaseUserStorage implements UserStorage {
     public User getUserByIdFromStorage(Long userId) {
         User user;
         try {
-            user = userTemplate.queryForObject(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
+            user = userTemplate.queryForObject(QUERY_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
             user.setFriends(getFriendsByUserId(userId));
-        } catch (EmptyResultDataAccessException e) {
-            user = null;
+        } catch (EmptyResultDataAccessException | NullPointerException e) {
+            throw new NotFoundException(String.format("Пользователь id = %d", userId));
         }
         return user;
     }
 
     @Override
     public int updateUserInStorage(User user) {
-        String sql = "update users set " +
-                "email = ?, " +
-                "login = ?, " +
-                "birthday = ?, " +
-                "name = ? " +
-                "where id = ?";
-        insertUserFriends(user);
-        return userTemplate.update(sql,
+        if (!user.getFriends().isEmpty()) {
+            insertUserFriends(user);
+        }
+        return userTemplate.update(UPDATE_USER,
                 user.getEmail(),
                 user.getLogin(),
                 user.getBirthday(),
@@ -95,11 +117,8 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public boolean deleteUserFromStorage(Long userId, User user) {
-        String sql = "delete from users where id = ? and email = ? " +
-                "and login = ? and name = ? and birthday = ?";
-        String sqlDeleteFriendUser = "delete from friends where friend_id = ?";
-        userTemplate.update(sqlDeleteFriendUser, userId);
-        return userTemplate.update(sql,
+        userTemplate.update(DELETE_FRIEND_RELATION, userId);
+        return userTemplate.update(DELETE_USER_BY_FIELDS,
                 userId,
                 user.getEmail(),
                 user.getLogin(),
@@ -109,16 +128,14 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public int deleteUserFromStorage(Long userId) {
-        String sql = "delete from users where id = ?";
-        return userTemplate.update(sql, userId);
+        userTemplate.update(DELETE_FRIEND_RELATION, userId);
+        return userTemplate.update(DELETE_USER_BY_ID, userId);
     }
 
     @Override
     public boolean checkUserIsPresentInStorage(Long userId, User user) {
-        String sqlByUserFields = "select u.* from users u " +
-                "where u.email = ? and u.login = ? and u.birthday = ? and u.name = ?";
-        List<User> usersById = userTemplate.query(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
-        List<User> usersByFields = userTemplate.query(sqlByUserFields, (rs, rowNum) -> mapUser(rs),
+        List<User> usersById = userTemplate.query(QUERY_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
+        List<User> usersByFields = userTemplate.query(QUERY_USER_BY_FIELDS, (rs, rowNum) -> mapUser(rs),
                 user.getEmail(),
                 user.getLogin(),
                 user.getBirthday(),
@@ -128,16 +145,15 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public boolean checkUserIsPresentInStorage(Long userId) {
-        List<User> users = userTemplate.query(SQL_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
+        List<User> users = userTemplate.query(QUERY_USER_BY_ID, (rs, rowNum) -> mapUser(rs), userId);
         return !users.isEmpty();
     }
 
     @Override
     public Long getLastUserIdFromStorage() {
-        String sql = "select id from users order by id desc limit 1";
         Long lastUserId;
         try {
-            lastUserId = userTemplate.queryForObject(sql, Long.class);
+            lastUserId = userTemplate.queryForObject(QUERY_LAST_USER_ID, Long.class);
         } catch (EmptyResultDataAccessException e) {
             lastUserId = 0L;
         }
@@ -147,15 +163,11 @@ public class DataBaseUserStorage implements UserStorage {
     @Override
     public Long addUserToStorage(Long userId, User user) {
         Long userIdAdded;
-        String sqlWoId = "insert into users (email, login, birthday, name) \n" +
-                "values(?, ?, ?, ?)";
-        String sqlWithId = "insert into users (id, email, login, birthday, name) \n" +
-                "values(?, ?, ?, ?, ?)";
         if (Objects.isNull(userId)) {
-            userTemplate.update(sqlWoId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
+            userTemplate.update(INSERT_USER_WITHOUT_ID, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
             userIdAdded = getLastUserIdFromStorage();
         } else {
-            userTemplate.update(sqlWithId, userId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
+            userTemplate.update(INSERT_USER_WITH_ID, userId, user.getEmail(), user.getLogin(), user.getBirthday(), user.getName());
             userIdAdded = userId;
         }
         return userIdAdded;

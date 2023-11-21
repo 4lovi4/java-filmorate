@@ -20,6 +20,8 @@ public class FilmService {
 
     private static final String FILM_NOT_FOUND_MESSAGE = "Фильм id = %d не найден";
 
+    private static final long DEFAULT_POPULAR_SIZE = 10L;
+
     @Autowired
     public FilmService(@Qualifier("dataBaseFilmStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
@@ -30,11 +32,7 @@ public class FilmService {
     }
 
     public Film getFilmById(Long filmId) {
-        Film film = filmStorage.getFilmByIdFromStorage(filmId);
-        if (Objects.isNull(film)) {
-            throw new NotFoundException(String.format(FILM_NOT_FOUND_MESSAGE, filmId));
-        }
-        return film;
+        return filmStorage.getFilmByIdFromStorage(filmId);
     }
 
     public Film addNewFilm(Film film) {
@@ -79,7 +77,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilmsByLikes(Long count) {
-        count = Objects.isNull(count) ? 10L : count;
+        count = Objects.isNull(count) ? DEFAULT_POPULAR_SIZE : count;
         return filmStorage.getAllFilmsFromStorage()
                 .stream()
                 .sorted((f1, f2) ->
@@ -92,11 +90,7 @@ public class FilmService {
     }
 
     public Rating getMpaById(int mpaId) {
-        Rating mpa = filmStorage.getMpaByIdFromStorage(mpaId);
-        if (Objects.isNull(mpa)) {
-            throw new NotFoundException(String.format("mpa id = %d не найден", mpaId));
-        }
-        return mpa;
+        return filmStorage.getMpaByIdFromStorage(mpaId);
     }
 
     public List<Rating> getAllMpa() {
@@ -104,11 +98,7 @@ public class FilmService {
     }
 
     public Genre getGenreById(int genreId) {
-        Genre genre = filmStorage.getGenreByIdFromStorage(genreId);
-        if (Objects.isNull(genre)) {
-            throw new NotFoundException(String.format("Жанр id = %d не найден", genreId));
-        }
-        return genre;
+        return filmStorage.getGenreByIdFromStorage(genreId);
     }
 
     public List<Genre> getAllGenres() {
