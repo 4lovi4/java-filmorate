@@ -4,6 +4,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -189,13 +190,15 @@ public class DataBaseFilmStorage implements FilmStorage {
 
     @Override
     public Long getLastFilmIdFromStorage() {
-        Long lastFilmId;
-        try {
-            lastFilmId = filmTemplate.queryForObject(QUERY_LAST_FILM_ID, Long.class);
-        } catch (EmptyResultDataAccessException e) {
-            lastFilmId = 0L;
-        }
-        return lastFilmId;
+        return filmTemplate.query(QUERY_LAST_FILM_ID, new ResultSetExtractor<Long>() {
+            @Override
+            public Long extractData(ResultSet rs) throws SQLException, DataAccessException {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0L;
+            }
+        });
     }
 
     @Override

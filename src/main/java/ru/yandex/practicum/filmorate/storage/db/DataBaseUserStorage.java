@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.db;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.NotFoundException;
@@ -151,13 +153,15 @@ public class DataBaseUserStorage implements UserStorage {
 
     @Override
     public Long getLastUserIdFromStorage() {
-        Long lastUserId;
-        try {
-            lastUserId = userTemplate.queryForObject(QUERY_LAST_USER_ID, Long.class);
-        } catch (EmptyResultDataAccessException e) {
-            lastUserId = 0L;
-        }
-        return lastUserId;
+        return userTemplate.query(QUERY_LAST_USER_ID, new ResultSetExtractor<Long>() {
+            @Override
+            public Long extractData(ResultSet rs) throws SQLException, DataAccessException {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0L;
+            }
+        });
     }
 
     @Override
