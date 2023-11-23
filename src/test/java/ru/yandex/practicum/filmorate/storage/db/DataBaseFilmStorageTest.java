@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JdbcTest
+@Sql(scripts = {"classpath:schema.sql", "classpath:data.sql"})
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
@@ -148,8 +150,19 @@ class DataBaseFilmStorageTest {
     }
 
     @Test
-    @DisplayName("Получение id фильма = 0 с пустой таблицей films")
+    @DisplayName("Получение id фильма = 0 из пустой таблицы films")
     void shouldReturnZeroFilmId() {
         assertEquals(0, dataBaseFilmStorage.getLastFilmIdFromStorage());
+    }
+
+    @Test
+    @DisplayName("Добавление лайка для фильма")
+    void shouldAddLikeToFilm()  {
+        Long userLikeId = 1L;
+        Long filmIdAdded = dataBaseFilmStorage.addFilmToStorage(null, filmOne);
+        dataBaseFilmStorage.addLikeToFilmInStorage(filmIdAdded, userLikeId);
+        Film filmLiked = dataBaseFilmStorage.getFilmByIdFromStorage(filmIdAdded);
+        assertEquals(1, filmLiked.getLikes().size());
+        assertTrue(filmLiked.getLikes().contains(userLikeId));
     }
 }
