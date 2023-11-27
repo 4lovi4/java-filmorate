@@ -1,11 +1,14 @@
-# java-filmorate
-ER диаграмма БД filmorate
+DELETE FROM FRIENDS;
+DELETE FROM FILMS_GENRES;
+DELETE FROM LIKES;
+DELETE FROM FILMS;
+ALTER TABLE FILMS ALTER COLUMN ID RESTART WITH 1;
+DELETE FROM USERS;
+ALTER TABLE USERS ALTER COLUMN ID RESTART WITH 1;
+DELETE FROM GENRES;
+DELETE FROM RATINGS;
 
-![ER Diagram filmorate DB](https://downloader.disk.yandex.ru/preview/ca8cb6af399e882b45d8e8be76e80d2a1d50f983ca31e1393b624a035775aabd/655ad5cf/9ElnoxqeIBUuEGA0FMzwPW8w8YCbJd8P2lsi0KJSq1WUtkspMG8g7sTmNRsfaJ6rzEQIsqxXXUIMjE9JhInJDA%3D%3D?uid=0&filename=filmorate_erd.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048)
 
-Примеры запросов на добавление/редактирование данных в БД
-
-```roomsql
 INSERT INTO GENRES (id, genre)
 VALUES (1, 'Комедия'),
 (2, 'Драма'),
@@ -46,26 +49,3 @@ INSERT INTO films_genres VALUES
 INSERT INTO films_genres VALUES
 ((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 2),
 ((SELECT ID FROM FILMS WHERE NAME = 'Луна'), 4);
-
-
-SELECT U.* FROM USERS u;
-SELECT * FROM FRIENDS f;
-SELECT f.* FROM FRIENDS f WHERE f.user_id = 1;
-
-
-SELECT g.GENRE FROM GENRES g 
-JOIN FILMS_GENRES fg 
-ON g.ID = fg.GENRE_ID 
-WHERE fg.FILM_ID = 0;
-
-SELECT f.*, r.RATING  FROM FILMS f LEFT 
-JOIN RATINGS r ON f.RATING_ID = r.ID WHERE f.ID = 3;
-
-SELECT * FROM LIKES l;
-
-select f.*, r.rating from films f LEFT join ratings r on f.rating_id = r.id;
-
-select g.genre from genres g 
-join films_genres fg on g.id = fg.genre_id 
-where fg.film_id = 2;
-```

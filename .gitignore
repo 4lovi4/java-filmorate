@@ -46,3 +46,5 @@ build/
 
 *.db
 db/*
+
+.DS_Store

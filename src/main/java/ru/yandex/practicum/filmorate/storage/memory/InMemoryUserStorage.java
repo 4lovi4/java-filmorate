@@ -1,12 +1,14 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.memory;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -17,36 +19,43 @@ public class InMemoryUserStorage implements UserStorage {
         this.usersInMemory = new HashMap<>();
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAllUsersFromStorage() {
         return new ArrayList<>(usersInMemory.values());
     }
 
-    public User getUserById(Long userId) {
+    public User getUserByIdFromStorage(Long userId) {
         return usersInMemory.get(userId);
     }
 
-    public void addUser(Long userId, User user) {
+    public Long addUserToStorage(Long userId, User user) {
         usersInMemory.put(userId, user);
+        return userId;
     }
 
-    public boolean deleteUser(Long userId, User user) {
+    @Override
+    public int updateUserInStorage(User user) {
+        deleteUserFromStorage(user.getId());
+        return addUserToStorage(user.getId(), user).intValue();
+    }
+
+    public boolean deleteUserFromStorage(Long userId, User user) {
         return usersInMemory.remove(userId, user);
     }
 
-    public User deleteUser(Long userId) {
-        return usersInMemory.remove(userId);
+    public int deleteUserFromStorage(Long userId) {
+        return Objects.isNull(usersInMemory.remove(userId)) ? 0 : 1;
     }
 
-    public boolean checkUserIsPresent(Long userId, User user) {
+    public boolean checkUserIsPresentInStorage(Long userId, User user) {
         return usersInMemory.containsKey(userId) ||
                 usersInMemory.containsValue(user);
     }
 
-    public boolean checkUserIsPresent(Long userId) {
+    public boolean checkUserIsPresentInStorage(Long userId) {
         return usersInMemory.containsKey(userId);
     }
 
-    public Long getLastUserId() {
+    public Long getLastUserIdFromStorage() {
         return usersInMemory.isEmpty() ? 0L :
                 usersInMemory
                         .keySet()

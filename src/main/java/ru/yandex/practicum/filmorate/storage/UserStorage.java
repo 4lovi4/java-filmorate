@@ -5,19 +5,21 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 
 public interface UserStorage {
-    List<User> getAllUsers();
+    List<User> getAllUsersFromStorage();
 
-    void addUser(Long userId, User user);
+    Long addUserToStorage(Long userId, User user);
 
-    User getUserById(Long userId);
+    int updateUserInStorage(User user);
 
-    boolean deleteUser(Long userId, User user);
+    User getUserByIdFromStorage(Long userId);
 
-    User deleteUser(Long userId);
+    boolean deleteUserFromStorage(Long userId, User user);
 
-    boolean checkUserIsPresent(Long userId, User user);
+    int deleteUserFromStorage(Long userId);
 
-    boolean checkUserIsPresent(Long userId);
+    boolean checkUserIsPresentInStorage(Long userId, User user);
 
-    Long getLastUserId();
+    boolean checkUserIsPresentInStorage(Long userId);
+
+    Long getLastUserIdFromStorage();
 }
